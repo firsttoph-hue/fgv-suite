@@ -1654,6 +1654,18 @@ ttInit();
 // Remove splash
 setTimeout(()=>{const s=document.getElementById('splash');if(s)s.remove();},3600);
 
+/* ── Expose all onclick functions to global scope (required for type="module") ── */
+Object.assign(window, {
+  switchModule, bsPickMonth, bsGoTab, bsQuickEdit, bsOpenModal, bsCloseModal,
+  bsSetOp, bsPostModal, bsPostEntry, bsSetOp2, bsSaveBatch, bsPrintReport,
+  bsResetData, bsClearAudit,
+  ttShowTab, ttOnTxTypeChange, ttOnAccountChange, ttAddItem, ttRemoveItem,
+  ttPostTransaction, ttClearForm, ttRenderLedger, ttClearFilters,
+  ttPopulateLedgerFilter, ttOpenDel, ttCloseDel, ttConfirmDel,
+  ttViewAttach, ttCloseAttach, ttExportCSV, ttAddEntity, ttRemoveEntity,
+  fwSignIn, fwSignOut, fwTogglePw,
+});
+
 /* ═══════════════════════════════════════════════════════════
    FIREBASE INTEGRATION
    ═══════════════════════════════════════════════════════════ */
