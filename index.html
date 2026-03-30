@@ -584,15 +584,15 @@ input.pos-readonly { background:var(--green-bg); color:var(--green); font-family
     <div class="fw-label">Email Address</div>
     <div class="fw-input-wrap">
       <input id="fw-email" class="fw-input" type="email" placeholder="you@example.com"
-        autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('fw-pass').focus()">
+        autocomplete="email">
     </div>
     <div class="fw-label">Password</div>
     <div class="fw-input-wrap">
       <input id="fw-pass" class="fw-input" type="password" placeholder="Enter password"
-        autocomplete="current-password" onkeydown="if(event.key==='Enter')fwSignIn()">
-      <button class="fw-eye" onclick="fwTogglePw()" title="Show/hide">👁</button>
+        autocomplete="current-password">
+      <button class="fw-eye" id="fw-eye-btn" title="Show/hide">👁</button>
     </div>
-    <button class="fw-btn" id="fw-btn" onclick="fwSignIn()">Sign In</button>
+    <button class="fw-btn" id="fw-btn">Sign In</button>
     <div class="fw-err" id="fw-err">Invalid email or password.</div>
     <div class="fw-footer">Confidential · Authorised access only</div>
   </div>
@@ -1683,6 +1683,19 @@ const firebaseConfig = {
 const fbApp  = initializeApp(firebaseConfig);
 const fbAuth = getAuth(fbApp);
 const fbDb   = getFirestore(fbApp);
+
+// ── Login form event listeners (avoids onclick/module scope issues) ───
+document.getElementById('fw-btn').addEventListener('click', () => fwSignIn());
+document.getElementById('fw-eye-btn').addEventListener('click', () => {
+  const inp = document.getElementById('fw-pass');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+});
+document.getElementById('fw-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('fw-pass').focus();
+});
+document.getElementById('fw-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fwSignIn();
+});
 
 // ── Sync helpers ─────────────────────────────────────────
 let _unsubBS = null, _unsubTT = null;
