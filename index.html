@@ -68,6 +68,76 @@ html { font-size: 14px; }
 body { font-family: var(--sans); min-height: 100vh; overflow: hidden; }
 
 /* ══════════════════════════════════════
+   FIREBASE LOGIN GATE
+══════════════════════════════════════ */
+#fw-gate {
+  position: fixed; inset: 0; background: var(--forest); z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.fw-card {
+  background: var(--deep); border: 1px solid var(--border-d); border-radius: 16px;
+  padding: 44px 48px 40px; width: 380px; max-width: 92vw;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.45);
+  display: flex; flex-direction: column; align-items: center;
+  animation: pwCardIn 0.5s cubic-bezier(.22,.8,.45,1) both;
+}
+@keyframes pwCardIn { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:none} }
+.fw-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--mint), var(--gold-d));
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 20px;
+}
+.fw-title { font-family: var(--serif); font-size: 26px; font-weight: 400; color: var(--gold-d); letter-spacing: 1px; margin-bottom: 4px; }
+.fw-sub { font-size: 10px; letter-spacing: 3px; color: var(--mint); text-transform: uppercase; margin-bottom: 30px; }
+.fw-label { font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); align-self: flex-start; margin-bottom: 6px; font-family: var(--display); width: 100%; }
+.fw-input-wrap { position: relative; width: 100%; margin-bottom: 14px; }
+.fw-input {
+  width: 100%; background: var(--surface-d); border: 1px solid var(--border-d); color: var(--text);
+  padding: 11px 44px 11px 14px; border-radius: 8px; font-family: var(--sans); font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.fw-input:focus { border-color: var(--gold-d); box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+.fw-input.shake { animation: pwShake 0.38s ease; border-color: var(--danger2) !important; }
+@keyframes pwShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(4px)} }
+.fw-eye {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text3);
+  font-size: 15px; padding: 4px; transition: color 0.15s; line-height: 1;
+}
+.fw-eye:hover { color: var(--text2); }
+.fw-btn {
+  width: 100%; background: linear-gradient(135deg, var(--gold-d), var(--gold2-d));
+  color: var(--forest); border: none; padding: 11px; border-radius: 8px;
+  font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; cursor: pointer; transition: all 0.2s; margin-bottom: 14px; margin-top: 6px;
+}
+.fw-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(201,168,76,0.28); }
+.fw-btn:active { transform: translateY(0); }
+.fw-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.fw-err {
+  font-size: 11px; color: var(--danger2); min-height: 16px; width: 100%;
+  font-family: var(--mono); letter-spacing: 0.5px; opacity: 0; transition: opacity 0.2s; text-align: center;
+}
+.fw-err.show { opacity: 1; }
+.fw-footer { margin-top: 22px; font-size: 9px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
+.fw-spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(0,0,0,0.2); border-top-color:#0a1a0f; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* User chip in masthead */
+.user-chip { display:flex; align-items:center; gap:7px; background:var(--surface-d); border:1px solid var(--border-d); border-radius:20px; padding:4px 12px 4px 6px; cursor:default; }
+.user-avatar { width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,var(--mint),var(--gold-d)); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--forest); flex-shrink:0; }
+.user-email { font-size:10px; color:var(--text2); font-family:var(--mono); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.btn-signout { background:transparent; border:1px solid var(--border-d); color:var(--text3); font-size:9px; padding:3px 8px; border-radius:5px; cursor:pointer; font-family:var(--display); letter-spacing:0.5px; text-transform:uppercase; transition:all 0.15s; margin-left:2px; }
+.btn-signout:hover { border-color:var(--danger); color:var(--danger2); }
+
+/* Sync indicator */
+.sync-dot { width:7px; height:7px; border-radius:50%; background:var(--mint); display:inline-block; margin-right:4px; transition:background 0.3s; }
+.sync-dot.syncing { background:var(--gold-d); animation:pulse 1s ease infinite; }
+.sync-dot.err { background:var(--danger2); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ══════════════════════════════════════
    SPLASH
 ══════════════════════════════════════ */
 #splash {
@@ -505,6 +575,29 @@ input.pos-readonly { background:var(--green-bg); color:var(--green); font-family
 <body>
 
 <!-- SPLASH -->
+<!-- ═══════════════════ FIREBASE LOGIN GATE ═══════════════════ -->
+<div id="fw-gate">
+  <div class="fw-card">
+    <div class="fw-icon">🌿</div>
+    <div class="fw-title">FGV Suite</div>
+    <div class="fw-sub">FirstToph Green Venture</div>
+    <div class="fw-label">Email Address</div>
+    <div class="fw-input-wrap">
+      <input id="fw-email" class="fw-input" type="email" placeholder="you@example.com"
+        autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('fw-pass').focus()">
+    </div>
+    <div class="fw-label">Password</div>
+    <div class="fw-input-wrap">
+      <input id="fw-pass" class="fw-input" type="password" placeholder="Enter password"
+        autocomplete="current-password" onkeydown="if(event.key==='Enter')fwSignIn()">
+      <button class="fw-eye" onclick="fwTogglePw()" title="Show/hide">👁</button>
+    </div>
+    <button class="fw-btn" id="fw-btn" onclick="fwSignIn()">Sign In</button>
+    <div class="fw-err" id="fw-err">Invalid email or password.</div>
+    <div class="fw-footer">Confidential · Authorised access only</div>
+  </div>
+</div>
+
 <div id="splash">
   <div class="splash-leaf">🌿</div>
   <div class="splash-logo">FirstToph Green Venture</div>
@@ -531,7 +624,13 @@ input.pos-readonly { background:var(--green-bg); color:var(--green); font-family
       </div>
     </div>
     <div class="masthead-right">
+      <span class="sync-dot" id="syncDot" title="Data sync status"></span>
       <span class="mst-date" id="mstDate"></span>
+      <div class="user-chip" id="userChip" style="display:none">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-email" id="userEmail"></span>
+        <button class="btn-signout" onclick="fwSignOut()">Sign out</button>
+      </div>
     </div>
   </div>
 
@@ -799,7 +898,14 @@ input.pos-readonly { background:var(--green-bg); color:var(--green); font-family
 <!-- TT TOAST -->
 <div id="tt-toast"></div>
 
-<script>
+<script type="module">
+/* ── Firebase imports (must be at top of module) ─────── */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 /* ════════════════════════════════════════════
    MODULE SWITCHER
 ════════════════════════════════════════════ */
@@ -912,15 +1018,14 @@ function bsBuildSeed() {
   return data;
 }
 
-let BS_DATA = (() => { try { return JSON.parse(localStorage.getItem('ftgv_data')||'null')||bsBuildSeed(); } catch(e){return bsBuildSeed();} })();
-let BS_AUDIT = (() => { try { return JSON.parse(localStorage.getItem('ftgv_audit')||'[]'); } catch(e){return[];} })();
+let BS_DATA = bsBuildSeed();
+let BS_AUDIT = [];
 let bsCurMonth = 0;
 let bsCurTab   = 'bs';
 let bsCurOp    = 'add';
 
 function bsPersist() {
-  localStorage.setItem('ftgv_data', JSON.stringify(BS_DATA));
-  localStorage.setItem('ftgv_audit', JSON.stringify(BS_AUDIT.slice(-500)));
+  fwSaveBS();
 }
 
 const bsSum = (m, accts) => accts.reduce((t,a)=>t+(BS_DATA[m][a.id]||0),0);
@@ -1178,7 +1283,8 @@ function bsPrintReport() {
 function bsResetData() {
   if(!confirm('Reset all BalanceSheet data to seed values?')) return;
   BS_DATA=bsBuildSeed(); BS_AUDIT=[];
-  bsPersist(); bsRenderPills(); bsRenderTab();
+  fwSaveBS();
+  bsRenderPills(); bsRenderTab();
   bsToast('🔄','Data reset to original seed values.');
 }
 
@@ -1216,7 +1322,6 @@ function ttInit() {
   ttLoadDB();
   document.getElementById('tt-txDate').value = ttToday();
   document.getElementById('tt-txRefPreview').textContent = 'Ref: FGV-' + String(TT_DB.txCounter+1).padStart(4,'0');
-  if (TT_DB.entities.length===0) ttSeedDemo();
   ttRenderAll();
 }
 
@@ -1231,9 +1336,8 @@ function ttSeedDemo() {
 }
 
 function ttToday() { return new Date().toISOString().split('T')[0]; }
-function ttSaveDB() { try { localStorage.setItem('fgv_tacktran', JSON.stringify(TT_DB)); } catch(e){} }
+function ttSaveDB() { fwSaveTT(); }
 function ttLoadDB() {
-  try { const s=localStorage.getItem('fgv_tacktran'); if(s) TT_DB=JSON.parse(s); } catch(e){}
   if (!TT_DB.entities) TT_DB.entities=[];
   if (!TT_DB.transactions) TT_DB.transactions=[];
   if (!TT_DB.txCounter) TT_DB.txCounter=1000;
@@ -1544,11 +1648,171 @@ function ttFmtNum(n){return Number(n||0).toLocaleString('en-NG',{minimumFraction
 
 function ttToast(msg){const t=document.getElementById('tt-toast');t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3200);}
 
-// Init TACKTRAN
+// Init TACKTRAN UI (data loaded later by Firebase)
 ttInit();
 
 // Remove splash
 setTimeout(()=>{const s=document.getElementById('splash');if(s)s.remove();},3600);
+
+/* ═══════════════════════════════════════════════════════════
+   FIREBASE INTEGRATION
+   ═══════════════════════════════════════════════════════════ */
+
+// ── Firebase config ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyD-wpAG6Sn4BQ3OMkszJJwM8w7HYJPpoXI",
+  authDomain: "fgv-suite.firebaseapp.com",
+  projectId: "fgv-suite",
+  storageBucket: "fgv-suite.firebasestorage.app",
+  messagingSenderId: "230718291161",
+  appId: "1:230718291161:web:a69893d6b0b13edf1fd2c8"
+};
+
+const fbApp  = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+const fbDb   = getFirestore(fbApp);
+
+// ── Sync helpers ─────────────────────────────────────────
+let _unsubBS = null, _unsubTT = null;
+
+function syncDot(state) {
+  const d = document.getElementById('syncDot');
+  if (!d) return;
+  d.className = 'sync-dot' + (state==='syncing'?' syncing':state==='err'?' err':'');
+  d.title = state==='syncing'?'Saving…':state==='err'?'Sync error':'Saved to cloud';
+}
+
+async function fwSaveBS() {
+  syncDot('syncing');
+  try {
+    await setDoc(doc(fbDb,'fgv','balancesheet'), {
+      data: JSON.stringify(BS_DATA),
+      audit: JSON.stringify(BS_AUDIT.slice(-500)),
+      updatedAt: Date.now()
+    });
+    syncDot('ok');
+  } catch(e) { console.error(e); syncDot('err'); }
+}
+
+async function fwSaveTT() {
+  syncDot('syncing');
+  try {
+    await setDoc(doc(fbDb,'fgv','tacktran'), {
+      db: JSON.stringify(TT_DB),
+      updatedAt: Date.now()
+    });
+    syncDot('ok');
+  } catch(e) { console.error(e); syncDot('err'); }
+}
+
+function fwSubscribeBS() {
+  if (_unsubBS) _unsubBS();
+  _unsubBS = onSnapshot(doc(fbDb,'fgv','balancesheet'), snap => {
+    if (!snap.exists()) return;
+    const d = snap.data();
+    try { BS_DATA  = JSON.parse(d.data)  || bsBuildSeed(); } catch(e){}
+    try { BS_AUDIT = JSON.parse(d.audit) || []; } catch(e){}
+    bsRenderPills(); bsRenderTab();
+    syncDot('ok');
+  });
+}
+
+function fwSubscribeTT() {
+  if (_unsubTT) _unsubTT();
+  _unsubTT = onSnapshot(doc(fbDb,'fgv','tacktran'), snap => {
+    if (!snap.exists()) {
+      // First time — seed demo data
+      TT_DB = { entities:[], transactions:[], txCounter:1000 };
+      ttSeedDemo();
+      return;
+    }
+    try { TT_DB = JSON.parse(snap.data().db); } catch(e){}
+    TT_DB.entities     = TT_DB.entities     || [];
+    TT_DB.transactions = TT_DB.transactions || [];
+    TT_DB.txCounter    = TT_DB.txCounter    || 1000;
+    ttRenderAll();
+    document.getElementById('tt-txRefPreview').textContent =
+      'Ref: FGV-' + String(TT_DB.txCounter+1).padStart(4,'0');
+    syncDot('ok');
+  });
+}
+
+// ── Auth UI ──────────────────────────────────────────────
+window.fwSignIn = async function() {
+  const email = document.getElementById('fw-email').value.trim();
+  const pass  = document.getElementById('fw-pass').value;
+  const btn   = document.getElementById('fw-btn');
+  const err   = document.getElementById('fw-err');
+  if (!email || !pass) { fwShakeErr('Please enter email and password.'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="fw-spinner"></span>Signing in…';
+  err.classList.remove('show');
+  try {
+    await signInWithEmailAndPassword(fbAuth, email, pass);
+    // onAuthStateChanged handles the rest
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+    const inp = document.getElementById('fw-pass');
+    inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+    fwShakeErr(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+      ? 'Invalid email or password.' : 'Sign-in error. Try again.');
+    setTimeout(()=>inp.classList.remove('shake'),400);
+  }
+};
+
+function fwShakeErr(msg) {
+  const err = document.getElementById('fw-err');
+  err.textContent = msg; err.classList.add('show');
+}
+
+window.fwSignOut = async function() {
+  if (_unsubBS) { _unsubBS(); _unsubBS=null; }
+  if (_unsubTT) { _unsubTT(); _unsubTT=null; }
+  await signOut(fbAuth);
+};
+
+window.fwTogglePw = function() {
+  const inp = document.getElementById('fw-pass');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+};
+
+// ── Auth state observer ──────────────────────────────────
+onAuthStateChanged(fbAuth, user => {
+  const gate  = document.getElementById('fw-gate');
+  const chip  = document.getElementById('userChip');
+  const email = document.getElementById('userEmail');
+  const avatar= document.getElementById('userAvatar');
+
+  if (user) {
+    // Signed in — hide gate, show app
+    gate.style.transition='opacity 0.4s ease';
+    gate.style.opacity='0';
+    setTimeout(()=>{ gate.style.display='none'; document.body.style.overflow=''; }, 420);
+
+    const initials = user.email.slice(0,2).toUpperCase();
+    avatar.textContent = initials;
+    email.textContent  = user.email;
+    chip.style.display = 'flex';
+
+    // Subscribe to real-time data
+    fwSubscribeBS();
+    fwSubscribeTT();
+  } else {
+    // Signed out — show gate
+    gate.style.display='flex'; gate.style.opacity='1';
+    document.body.style.overflow='hidden';
+    chip.style.display='none';
+    document.getElementById('fw-btn').disabled=false;
+    document.getElementById('fw-btn').textContent='Sign In';
+    document.getElementById('fw-email').value='';
+    document.getElementById('fw-pass').value='';
+    document.getElementById('fw-err').classList.remove('show');
+  }
+});
+
+// Focus email on load
+setTimeout(()=>{ const e=document.getElementById('fw-email'); if(e)e.focus(); }, 100);
 </script>
 </body>
 </html>
