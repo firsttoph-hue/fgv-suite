@@ -771,15 +771,40 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                   <div class="tt-section-divider" style="margin-top:4px;">Supply Line Items</div>
                   <div class="tt-items-wrap" style="margin-bottom:5px;">
                     <table class="tt-items-tbl" id="supItemsTable">
-                      <thead><tr><th style="min-width:150px;">Product</th><th style="min-width:70px;">Qty</th><th style="min-width:75px;">Unit</th><th style="min-width:100px;">Sale Price/Unit (₦)</th><th style="min-width:100px;">Cost Price/Unit (₦)</th><th style="min-width:90px;">Other Cost (₦)</th><th style="min-width:100px;">Line Revenue (₦)</th><th style="min-width:90px;">Line Cost (₦)</th><th style="min-width:90px;">Line Profit (₦)</th><th></th></tr></thead>
+                      <thead><tr><th style="min-width:150px;">Product</th><th style="min-width:70px;">Qty</th><th style="min-width:75px;">Unit</th><th style="min-width:100px;">Sale Price/Unit (₦)</th><th style="min-width:100px;">Cost Price/Unit (₦)</th><th style="min-width:100px;">Line Revenue (₦)</th><th style="min-width:90px;">Line Cost (₦)</th><th style="min-width:90px;">Line Profit (₦)</th><th></th></tr></thead>
                       <tbody id="supItemsBody"></tbody>
                     </table>
                   </div>
-                  <div style="display:flex;gap:7px;align-items:center;margin-bottom:3px;"><button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="addSupplyLine()">+ Add Line Item</button><span style="font-size:10px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">Click to add more products</span></div>
+                  <div style="display:flex;gap:7px;align-items:center;margin-bottom:8px;"><button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="addSupplyLine()">+ Add Line Item</button><span style="font-size:10px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">Click to add more products</span></div>
+
+                  <!-- ADDITIONAL COSTS SECTION -->
+                  <div class="tt-section-divider" style="margin-top:3px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>Additional Costs <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;text-transform:none;letter-spacing:0;">(transport, handling, etc.)</span></span>
+                    <button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="addAdditionalCostRow()" style="font-size:10px;padding:2px 8px;">+ Add Cost</button>
+                  </div>
+                  <div id="additionalCostsWrap" style="margin-bottom:8px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;" id="additionalCostsTable">
+                      <thead>
+                        <tr style="background:var(--tt-surface2);">
+                          <th style="padding:7px 10px;text-align:left;color:var(--tt-ink3);font-family:'Syne',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid var(--tt-border);min-width:160px;">Cost Type</th>
+                          <th style="padding:7px 10px;text-align:left;color:var(--tt-ink3);font-family:'Syne',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid var(--tt-border);">Description (optional)</th>
+                          <th style="padding:7px 10px;text-align:left;color:var(--tt-ink3);font-family:'Syne',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1px solid var(--tt-border);min-width:130px;">Amount (₦)</th>
+                          <th style="padding:7px 10px;border-bottom:1px solid var(--tt-border);width:30px;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="additionalCostsBody"></tbody>
+                    </table>
+                    <div id="additionalCostsEmpty" style="padding:10px 12px;font-size:11px;color:var(--tt-ink3);font-style:italic;">No additional costs added. Click "+ Add Cost" to include transport, loading, or other expenses.</div>
+                    <div id="additionalCostsTotalRow" style="display:none;background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:0 0 6px 6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+                      <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--tt-ink2);">Total Additional Costs</span>
+                      <span id="additionalCostsTotal" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--tt-red);">₦0.00</span>
+                    </div>
+                  </div>
+
                   <div class="tt-section-divider" style="margin-top:3px;">Computed Financials</div>
                   <div class="tt-form-row" style="grid-template-columns:1fr 1fr 1fr;">
                     <div class="tt-fg"><label>Total Supply Amount (₦)</label><input type="text" id="supTotalRevenue" readonly></div>
-                    <div class="tt-fg"><label>Total Cost (₦)</label><input class="neg-readonly" type="text" id="supTotalCost" readonly></div>
+                    <div class="tt-fg"><label>Total Cost (₦) <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">(incl. addl. costs)</span></label><input class="neg-readonly" type="text" id="supTotalCost" readonly></div>
                     <div class="tt-fg"><label>Supply Profit (₦)</label><input type="text" id="supProfit" readonly></div>
                   </div>
                   <div class="tt-form-row"><div class="tt-fg full"><label>Notes / Narration</label><input type="text" id="supNarr" placeholder="e.g. LPO ref, delivery note…"></div></div>
@@ -797,7 +822,7 @@ input[type=number] { font-family: 'DM Mono', monospace; }
             <div class="tt-panel-body" style="padding-bottom:0;">
               <div class="tt-filter-bar"><input type="text" id="sfCustomer" placeholder="Filter customer…" oninput="renderSupplyLedger()" style="max-width:190px;"><input type="date" id="sfFrom" onchange="renderSupplyLedger()"><input type="date" id="sfTo" onchange="renderSupplyLedger()"><button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="clearSupplyFilters()">Reset</button></div>
             </div>
-            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Customer</th><th>Product</th><th>Qty</th><th>Supply Amt (₦)</th><th>Cost (₦)</th><th>Profit (₦)</th><th>Margin %</th><th></th></tr></thead><tbody id="supplyLedgerBody"></tbody></table></div>
+            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Customer</th><th>Product / Details</th><th>Supply Amt (₦)</th><th>Total Cost (₦)</th><th>Profit (₦)</th><th>Margin %</th><th></th></tr></thead><tbody id="supplyLedgerBody"></tbody></table></div>
             <div id="supplyLedgerEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">📦</div>No supply entries found.</div>
           </div>
         </div>
@@ -1384,33 +1409,126 @@ function exportCSV(){const rows=[['Date','Ref','Type','Account','Narration','Deb
 function updateSupplyRefPreview(){var el=document.getElementById('supRefPreview');if(el)el.textContent='Ref: SUP-'+String((DB.supCounter||0)+1).padStart(4,'0');}
 var supLineItems=[],supLineCounter=0;
 var SUP_UNITS=['kg','litres','bags','tonnes','crates','pieces','cartons','units','MT','drums','gallons','rolls','pallets','packs','boxes'];
+
+/* ── Additional Costs (transport, loading, etc.) ── */
+var supAddlCosts=[],supAddlCounter=0;
+var ADDL_COST_TYPES=['Transport / Haulage','Loading / Offloading','Storage / Warehousing','Customs / Clearance','Insurance','Packaging','Fumigation','Weighbridge Fee','Agency Fee','Bank Charges','Other Expenses'];
+
+function addAdditionalCostRow(data){
+  supAddlCounter++;var id='acr'+supAddlCounter;supAddlCosts.push({id:id});
+  var tbody=document.getElementById('additionalCostsBody');
+  var empty=document.getElementById('additionalCostsEmpty');
+  var totalRow=document.getElementById('additionalCostsTotalRow');
+  if(empty)empty.style.display='none';
+  if(totalRow)totalRow.style.display='flex';
+  var tr=document.createElement('tr');tr.id='acrow_'+id;
+  var typeOpts=ADDL_COST_TYPES.map(function(t){return'<option value="'+t+'"'+(data&&data.costType===t?' selected':'')+'>'+t+'</option>';}).join('');
+  tr.innerHTML='<td style="padding:6px 8px;border-bottom:1px solid var(--tt-border);"><select onchange="calcSupplyTotals()" data-addl-field="costType" style="width:100%;font-size:12px;">'+typeOpts+'</select></td>'
+    +'<td style="padding:6px 8px;border-bottom:1px solid var(--tt-border);"><input type="text" placeholder="e.g. Lagos–Ibadan route…" value="'+(data&&data.desc?data.desc:'')+'" style="width:100%;font-size:12px;" data-addl-field="desc"></td>'
+    +'<td style="padding:6px 8px;border-bottom:1px solid var(--tt-border);"><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.amount?data.amount:'')+'" oninput="calcSupplyTotals()" data-addl-field="amount" style="width:100%;font-size:12px;font-family:\'DM Mono\',monospace;"></td>'
+    +'<td style="padding:6px 8px;border-bottom:1px solid var(--tt-border);text-align:center;"><button class="tt-rm-btn" onclick="removeAdditionalCostRow(\''+id+'\')">✕</button></td>';
+  tbody.appendChild(tr);
+  calcSupplyTotals();
+}
+
+function removeAdditionalCostRow(id){
+  var row=document.getElementById('acrow_'+id);if(row)row.remove();
+  supAddlCosts=supAddlCosts.filter(function(c){return c.id!==id;});
+  var empty=document.getElementById('additionalCostsEmpty');
+  var totalRow=document.getElementById('additionalCostsTotalRow');
+  if(supAddlCosts.length===0){if(empty)empty.style.display='block';if(totalRow)totalRow.style.display='none';}
+  calcSupplyTotals();
+}
+
+function getAdditionalCostsTotal(){
+  var total=0;
+  supAddlCosts.forEach(function(c){
+    var row=document.getElementById('acrow_'+c.id);if(!row)return;
+    total+=parseFloat(row.querySelector('[data-addl-field=amount]').value)||0;
+  });
+  var el=document.getElementById('additionalCostsTotal');
+  if(el)el.textContent='₦'+ttFmt(total);
+  return total;
+}
+
+function getAdditionalCostsList(){
+  var list=[];
+  supAddlCosts.forEach(function(c){
+    var row=document.getElementById('acrow_'+c.id);if(!row)return;
+    list.push({
+      costType:row.querySelector('[data-addl-field=costType]').value,
+      desc:row.querySelector('[data-addl-field=desc]').value.trim(),
+      amount:parseFloat(row.querySelector('[data-addl-field=amount]').value)||0
+    });
+  });
+  return list;
+}
+
 function addSupplyLine(data){
   supLineCounter++;var id='sli'+supLineCounter;supLineItems.push({id:id});
   var tbody=document.getElementById('supItemsBody');var tr=document.createElement('tr');tr.id='row_'+id;tr.setAttribute('data-line',id);
   var unitOpts=SUP_UNITS.map(function(u){return'<option value="'+u+'"'+(data&&data.unit===u?' selected':'')+'>'+u+'</option>';}).join('');
-  tr.innerHTML='<td><input type="text" placeholder="Product / description…" value="'+(data&&data.product?data.product:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="product"></td><td><input type="number" min="0" step="0.01" placeholder="0" value="'+(data&&data.qty?data.qty:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="qty" style="min-width:65px;"></td><td><select onchange="calcSupplyLine(\''+id+'\')" data-field="unit">'+unitOpts+'</select></td><td><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.salePrice?data.salePrice:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="salePrice"></td><td><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.costPrice?data.costPrice:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="costPrice"></td><td><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.otherCost?data.otherCost:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="otherCost" title="Transport, handling, etc."></td><td><input type="text" readonly data-field="lineRevenue" style="min-width:85px;"></td><td><input class="neg-readonly" type="text" readonly data-field="lineCost" style="min-width:80px;"></td><td><input type="text" readonly data-field="lineProfit" style="min-width:80px;"></td><td><button class="tt-rm-btn" onclick="removeSupplyLine(\''+id+'\')">✕</button></td>';
+  tr.innerHTML='<td><input type="text" placeholder="Product / description…" value="'+(data&&data.product?data.product:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="product"></td><td><input type="number" min="0" step="0.01" placeholder="0" value="'+(data&&data.qty?data.qty:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="qty" style="min-width:65px;"></td><td><select onchange="calcSupplyLine(\''+id+'\')" data-field="unit">'+unitOpts+'</select></td><td><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.salePrice?data.salePrice:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="salePrice"></td><td><input type="number" min="0" step="0.01" placeholder="0.00" value="'+(data&&data.costPrice?data.costPrice:'')+'" oninput="calcSupplyLine(\''+id+'\')" data-field="costPrice"></td><td><input type="text" readonly data-field="lineRevenue" style="min-width:85px;"></td><td><input class="neg-readonly" type="text" readonly data-field="lineCost" style="min-width:80px;"></td><td><input type="text" readonly data-field="lineProfit" style="min-width:80px;"></td><td><button class="tt-rm-btn" onclick="removeSupplyLine(\''+id+'\')">✕</button></td>';
   tbody.appendChild(tr);if(data)calcSupplyLine(id);
 }
 function getLineRow(id){return document.getElementById('row_'+id);}
-function calcSupplyLine(id){var row=getLineRow(id);if(!row)return;var qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0,other=parseFloat(row.querySelector('[data-field=otherCost]').value)||0,rev=qty*saleP,cost=(qty*costP)+other,profit=rev-cost;row.querySelector('[data-field=lineRevenue]').value='₦'+ttFmt(rev);row.querySelector('[data-field=lineCost]').value='₦'+ttFmt(cost);var profEl=row.querySelector('[data-field=lineProfit]');profEl.value=(profit<0?'−':'')+'₦'+ttFmt(Math.abs(profit));profEl.className=profit<0?'neg-readonly':'pos-readonly';calcSupplyTotals();}
-function calcSupplyTotals(){var totalRev=0,totalCost=0;supLineItems.forEach(function(li){var row=getLineRow(li.id);if(!row)return;var qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0,other=parseFloat(row.querySelector('[data-field=otherCost]').value)||0;totalRev+=qty*saleP;totalCost+=(qty*costP)+other;});var profit=totalRev-totalCost;document.getElementById('supTotalRevenue').value='₦'+ttFmt(totalRev);document.getElementById('supTotalCost').value='₦'+ttFmt(totalCost);var profEl=document.getElementById('supProfit');profEl.value=(profit<0?'−':'')+'₦'+ttFmt(Math.abs(profit));profEl.className=profit<0?'neg-readonly':'pos-readonly';}
+function calcSupplyLine(id){var row=getLineRow(id);if(!row)return;var qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0,rev=qty*saleP,cost=qty*costP,profit=rev-cost;row.querySelector('[data-field=lineRevenue]').value='₦'+ttFmt(rev);row.querySelector('[data-field=lineCost]').value='₦'+ttFmt(cost);var profEl=row.querySelector('[data-field=lineProfit]');profEl.value=(profit<0?'−':'')+'₦'+ttFmt(Math.abs(profit));profEl.className=profit<0?'neg-readonly':'pos-readonly';calcSupplyTotals();}
+
+function calcSupplyTotals(){
+  var totalRev=0,totalBaseCost=0;
+  supLineItems.forEach(function(li){var row=getLineRow(li.id);if(!row)return;var qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0;totalRev+=qty*saleP;totalBaseCost+=qty*costP;});
+  var addlTotal=getAdditionalCostsTotal();
+  var totalCost=totalBaseCost+addlTotal;
+  var profit=totalRev-totalCost;
+  document.getElementById('supTotalRevenue').value='₦'+ttFmt(totalRev);
+  document.getElementById('supTotalCost').value='₦'+ttFmt(totalCost);
+  var profEl=document.getElementById('supProfit');profEl.value=(profit<0?'−':'')+'₦'+ttFmt(Math.abs(profit));profEl.className=profit<0?'neg-readonly':'pos-readonly';
+}
+
 function removeSupplyLine(id){var row=getLineRow(id);if(row)row.remove();supLineItems=supLineItems.filter(function(li){return li.id!==id;});if(supLineItems.length===0)addSupplyLine();calcSupplyTotals();}
-function getSupplyLines(){var lines=[];supLineItems.forEach(function(li){var row=getLineRow(li.id);if(!row)return;var product=row.querySelector('[data-field=product]').value.trim(),qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,unit=row.querySelector('[data-field=unit]').value,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0,other=parseFloat(row.querySelector('[data-field=otherCost]').value)||0;lines.push({product:product,qty:qty,unit:unit,salePrice:saleP,costPrice:costP,otherCost:other,revenue:qty*saleP,cost:(qty*costP)+other,profit:(qty*saleP)-((qty*costP)+other)});});return lines;}
+function getSupplyLines(){var lines=[];supLineItems.forEach(function(li){var row=getLineRow(li.id);if(!row)return;var product=row.querySelector('[data-field=product]').value.trim(),qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,unit=row.querySelector('[data-field=unit]').value,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0;lines.push({product:product,qty:qty,unit:unit,salePrice:saleP,costPrice:costP,revenue:qty*saleP,cost:qty*costP,profit:(qty*saleP)-(qty*costP)});});return lines;}
 function submitSupply(){
   var date=document.getElementById('supDate').value,customer=document.getElementById('supCustomer').value.trim(),narr=document.getElementById('supNarr').value.trim();
   if(!date){ttToast('⚠ Select a date.');return;}if(!customer){ttToast('⚠ Enter customer name.');return;}
   var lines=getSupplyLines(),validLines=lines.filter(function(l){return l.product&&l.qty>0&&l.salePrice>0;});if(!validLines.length){ttToast('⚠ Add at least one valid line item.');return;}
+  var addlCosts=getAdditionalCostsList();
+  var addlTotal=addlCosts.reduce(function(s,c){return s+c.amount;},0);
+  var totalRev=validLines.reduce(function(s,l){return s+l.revenue;},0);
+  var totalBaseCost=validLines.reduce(function(s,l){return s+l.cost;},0);
+  var totalCost=totalBaseCost+addlTotal;
+  var totalProfit=totalRev-totalCost;
   DB.supCounter=(DB.supCounter||0)+1;var ref='SUP-'+String(DB.supCounter).padStart(4,'0');if(!DB.supplies)DB.supplies=[];
-  validLines.forEach(function(l,i){DB.supplies.unshift({id:'sup'+Date.now()+'_'+i,ref:ref+(validLines.length>1?'/'+(i+1):''),date:date,customer:customer,product:l.product,qty:l.qty,unit:l.unit,salePrice:l.salePrice,costPrice:l.costPrice,otherCost:l.otherCost,revenue:l.revenue,cost:l.cost,profit:l.profit,narr:narr});});
-  saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();renderDashboard();clearSupplyForm();ttToast('✓ Supply posted: '+ref+' ('+validLines.length+' line'+(validLines.length>1?'s':'')+')');
+  DB.supplies.unshift({
+    id:'sup'+Date.now(),ref:ref,date:date,customer:customer,
+    lines:validLines,
+    product:validLines.map(function(l){return l.product;}).join(', '),
+    qty:validLines[0].qty,unit:validLines[0].unit,
+    salePrice:validLines[0].salePrice,costPrice:validLines[0].costPrice,
+    additionalCosts:addlCosts,additionalTotal:addlTotal,
+    revenue:totalRev,cost:totalCost,profit:totalProfit,narr:narr
+  });
+  saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();renderDashboard();clearSupplyForm();
+  ttToast('✓ Supply posted: '+ref+' ('+validLines.length+' line'+(validLines.length>1?'s':'')+(addlCosts.length?' · '+addlCosts.length+' addl cost'+(addlCosts.length>1?'s':''):'')+')');
 }
-function clearSupplyForm(){document.getElementById('supCustomer').value='';document.getElementById('supNarr').value='';document.getElementById('supDate').value=ttToday();supLineItems=[];supLineCounter=0;document.getElementById('supItemsBody').innerHTML='';addSupplyLine();['supTotalRevenue','supTotalCost','supProfit'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});var profEl=document.getElementById('supProfit');if(profEl)profEl.className='pos-readonly';updateSupplyRefPreview();}
-function renderSupplyStats(){var supplies=DB.supplies||[],totalRevenue=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRevenue>0?(totalProfit/totalRevenue*100):0,todayStr=ttToday(),todayProfit=supplies.filter(function(e){return e.date===todayStr;}).reduce(function(s,e){return s+e.profit;},0);var grid=document.getElementById('supplyStatGrid');if(!grid)return;grid.innerHTML='<div class="tt-stat-card gold"><div class="tt-stat-label">Total Supplied</div><div class="tt-stat-val gold">₦'+ttFmt(totalRevenue)+'</div><div class="tt-stat-sub">'+supplies.length+' entries</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Cost</div><div class="tt-stat-val red">₦'+ttFmt(totalCost)+'</div><div class="tt-stat-sub">Deducted from revenue</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Supply Profit</div><div class="tt-stat-val green">₦'+ttFmt(totalProfit)+'</div><div class="tt-stat-sub">Net after cost</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">Profit Margin</div><div class="tt-stat-val blue">'+margin.toFixed(1)+'%</div><div class="tt-stat-sub">Today: ₦'+ttFmt(todayProfit)+'</div></div>';}
-function renderSupplyBreakdown(){var supplies=DB.supplies||[],bdEl=document.getElementById('supplyBreakdownBody'),tcEl=document.getElementById('supplyTopCustomers');if(!bdEl)return;if(!supplies.length){bdEl.innerHTML='<div class="tt-empty"><div class="tt-empty-icon">📦</div>No supply entries yet.</div>';tcEl.innerHTML='<div class="tt-empty" style="padding:10px 0;">No data yet.</div>';return;}var totalRev=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRev>0?(totalProfit/totalRev*100):0,profClass=totalProfit>=0?'green':'red';bdEl.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:12px;"><div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Revenue</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-gold);">₦'+ttFmt(totalRev)+'</div></div><div style="background:var(--tt-red-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Cost</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-red);">₦'+ttFmt(totalCost)+'</div></div><div style="background:var(--tt-green-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Net Profit</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-'+profClass+');">'+(totalProfit<0?'−':'')+'₦'+ttFmt(Math.abs(totalProfit))+'</div></div><div style="background:var(--tt-blue-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Avg Margin</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-blue);">'+margin.toFixed(1)+'%</div></div></div>';var custMap={};supplies.forEach(function(e){if(!custMap[e.customer])custMap[e.customer]={revenue:0,profit:0,entries:0};custMap[e.customer].revenue+=e.revenue;custMap[e.customer].profit+=e.profit;custMap[e.customer].entries++;});var custArr=Object.keys(custMap).map(function(k){return{name:k,revenue:custMap[k].revenue,profit:custMap[k].profit,entries:custMap[k].entries};});custArr.sort(function(a,b){return b.profit-a.profit;});tcEl.innerHTML=custArr.slice(0,5).map(function(c,i){var pc=c.revenue>0?(c.profit/c.revenue*100).toFixed(1):'0.0';return'<div class="tt-entity-row" style="margin-bottom:5px;"><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--tt-ink3);min-width:18px;">#'+(i+1)+'</div><div class="tt-entity-body"><div class="tt-entity-name">'+c.name+'</div><div class="tt-entity-phone">'+c.entries+' entr'+(c.entries===1?'y':'ies')+' · margin '+pc+'%</div></div><div style="text-align:right;"><div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--tt-gold);">₦'+ttFmt(c.revenue)+'</div><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:'+(c.profit>=0?'var(--tt-green)':'var(--tt-red)');'}">'+(c.profit<0?'−':'')+'₦'+ttFmt(Math.abs(c.profit))+'</div></div></div>';}).join('');}
-function renderSupplyLedger(){var supplies=DB.supplies||[],custQ=(document.getElementById('sfCustomer')||{value:''}).value.toLowerCase(),fFrom=(document.getElementById('sfFrom')||{value:''}).value,fTo=(document.getElementById('sfTo')||{value:''}).value,rows=supplies.filter(function(e){if(custQ&&e.customer.toLowerCase().indexOf(custQ)<0)return false;if(fFrom&&e.date<fFrom)return false;if(fTo&&e.date>fTo)return false;return true;});var tbody=document.getElementById('supplyLedgerBody'),empty=document.getElementById('supplyLedgerEmpty');if(!tbody)return;if(!rows.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}if(empty)empty.style.display='none';tbody.innerHTML=rows.map(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0',profColor=e.profit>=0?'var(--tt-green)':'var(--tt-red)';return'<tr><td class="tt-mono">'+e.date+'</td><td class="tt-mono" style="color:var(--tt-ink3);">'+e.ref+'</td><td style="font-weight:600;color:var(--tt-ink)">'+e.customer+'</td><td style="color:var(--tt-ink2);">'+e.product+'<br><span style="font-size:10px;color:var(--tt-ink3);">'+e.qty+' '+e.unit+(e.narr?' · '+e.narr:'')+'</span></td><td class="tt-mono">'+ttFmt(e.qty)+' '+e.unit+'</td><td class="tt-mono" style="color:var(--tt-gold);">₦'+ttFmt(e.revenue)+'</td><td class="tt-mono" style="color:var(--tt-red);">₦'+ttFmt(e.cost)+'</td><td class="tt-mono" style="color:'+profColor+';">'+(e.profit<0?'−':'')+'₦'+ttFmt(Math.abs(e.profit))+'</td><td class="tt-mono" style="color:'+profColor+';">'+margin+'%</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteSupply(\''+e.id+'\')">✕</button></td></tr>';}).join('');}
+function clearSupplyForm(){
+  document.getElementById('supCustomer').value='';document.getElementById('supNarr').value='';document.getElementById('supDate').value=ttToday();
+  supLineItems=[];supLineCounter=0;document.getElementById('supItemsBody').innerHTML='';addSupplyLine();
+  /* reset additional costs */
+  supAddlCosts=[];supAddlCounter=0;
+  document.getElementById('additionalCostsBody').innerHTML='';
+  var empty=document.getElementById('additionalCostsEmpty');var totalRow=document.getElementById('additionalCostsTotalRow');
+  if(empty)empty.style.display='block';if(totalRow)totalRow.style.display='none';
+  var totEl=document.getElementById('additionalCostsTotal');if(totEl)totEl.textContent='₦0.00';
+  ['supTotalRevenue','supTotalCost','supProfit'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var profEl=document.getElementById('supProfit');if(profEl)profEl.className='pos-readonly';
+  updateSupplyRefPreview();
+}
+function renderSupplyStats(){var supplies=DB.supplies||[],totalRevenue=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRevenue>0?(totalProfit/totalRevenue*100):0,todayStr=ttToday(),todayProfit=supplies.filter(function(e){return e.date===todayStr;}).reduce(function(s,e){return s+e.profit;},0);var grid=document.getElementById('supplyStatGrid');if(!grid)return;grid.innerHTML='<div class="tt-stat-card gold"><div class="tt-stat-label">Total Supplied</div><div class="tt-stat-val gold">₦'+ttFmt(totalRevenue)+'</div><div class="tt-stat-sub">'+supplies.length+' entries</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Cost</div><div class="tt-stat-val red">₦'+ttFmt(totalCost)+'</div><div class="tt-stat-sub">Incl. transport &amp; other costs</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Supply Profit</div><div class="tt-stat-val green">₦'+ttFmt(totalProfit)+'</div><div class="tt-stat-sub">Net after all costs</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">Profit Margin</div><div class="tt-stat-val blue">'+margin.toFixed(1)+'%</div><div class="tt-stat-sub">Today: ₦'+ttFmt(todayProfit)+'</div></div>';}
+function renderSupplyBreakdown(){var supplies=DB.supplies||[],bdEl=document.getElementById('supplyBreakdownBody'),tcEl=document.getElementById('supplyTopCustomers');if(!bdEl)return;if(!supplies.length){bdEl.innerHTML='<div class="tt-empty"><div class="tt-empty-icon">📦</div>No supply entries yet.</div>';tcEl.innerHTML='<div class="tt-empty" style="padding:10px 0;">No data yet.</div>';return;}var totalRev=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalAddl=supplies.reduce(function(s,e){return s+(e.additionalTotal||0);},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRev>0?(totalProfit/totalRev*100):0,profClass=totalProfit>=0?'green':'red';bdEl.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:12px;"><div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Revenue</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-gold);">₦'+ttFmt(totalRev)+'</div></div><div style="background:var(--tt-red-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Cost (incl. addl.)</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-red);">₦'+ttFmt(totalCost)+'</div><div style="font-size:10px;color:var(--tt-ink3);margin-top:3px;">Additional: ₦'+ttFmt(totalAddl)+'</div></div><div style="background:var(--tt-green-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Net Profit</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-'+profClass+');">'+(totalProfit<0?'−':'')+'₦'+ttFmt(Math.abs(totalProfit))+'</div></div><div style="background:var(--tt-blue-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Avg Margin</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-blue);">'+margin.toFixed(1)+'%</div></div></div>';var custMap={};supplies.forEach(function(e){if(!custMap[e.customer])custMap[e.customer]={revenue:0,profit:0,entries:0};custMap[e.customer].revenue+=e.revenue;custMap[e.customer].profit+=e.profit;custMap[e.customer].entries++;});var custArr=Object.keys(custMap).map(function(k){return{name:k,revenue:custMap[k].revenue,profit:custMap[k].profit,entries:custMap[k].entries};});custArr.sort(function(a,b){return b.profit-a.profit;});tcEl.innerHTML=custArr.slice(0,5).map(function(c,i){var pc=c.revenue>0?(c.profit/c.revenue*100).toFixed(1):'0.0';return'<div class="tt-entity-row" style="margin-bottom:5px;"><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--tt-ink3);min-width:18px;">#'+(i+1)+'</div><div class="tt-entity-body"><div class="tt-entity-name">'+c.name+'</div><div class="tt-entity-phone">'+c.entries+' entr'+(c.entries===1?'y':'ies')+' · margin '+pc+'%</div></div><div style="text-align:right;"><div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--tt-gold);">₦'+ttFmt(c.revenue)+'</div><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:'+(c.profit>=0?'var(--tt-green)':'var(--tt-red)')+';">'+(c.profit<0?'−':'')+'₦'+ttFmt(Math.abs(c.profit))+'</div></div></div>';}).join('');}
+function renderSupplyLedger(){var supplies=DB.supplies||[],custQ=(document.getElementById('sfCustomer')||{value:''}).value.toLowerCase(),fFrom=(document.getElementById('sfFrom')||{value:''}).value,fTo=(document.getElementById('sfTo')||{value:''}).value,rows=supplies.filter(function(e){if(custQ&&e.customer.toLowerCase().indexOf(custQ)<0)return false;if(fFrom&&e.date<fFrom)return false;if(fTo&&e.date>fTo)return false;return true;});var tbody=document.getElementById('supplyLedgerBody'),empty=document.getElementById('supplyLedgerEmpty');if(!tbody)return;if(!rows.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}if(empty)empty.style.display='none';tbody.innerHTML=rows.map(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0',profColor=e.profit>=0?'var(--tt-green)':'var(--tt-red)';var addlNote=(e.additionalTotal&&e.additionalTotal>0)?'<br><span style="font-size:10px;color:var(--tt-red);">+₦'+ttFmt(e.additionalTotal)+' addl. costs</span>':'';return'<tr><td class="tt-mono">'+e.date+'</td><td class="tt-mono" style="color:var(--tt-ink3);">'+e.ref+'</td><td style="font-weight:600;color:var(--tt-ink)">'+e.customer+'</td><td style="color:var(--tt-ink2);">'+e.product+(e.narr?'<br><span style="font-size:10px;color:var(--tt-ink3);">'+e.narr+'</span>':'')+addlNote+'</td><td class="tt-mono" style="color:var(--tt-gold);">₦'+ttFmt(e.revenue)+'</td><td class="tt-mono" style="color:var(--tt-red);">₦'+ttFmt(e.cost)+'</td><td class="tt-mono" style="color:'+profColor+';">'+(e.profit<0?'−':'')+'₦'+ttFmt(Math.abs(e.profit))+'</td><td class="tt-mono" style="color:'+profColor+';">'+margin+'%</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteSupply(\''+e.id+'\')">✕</button></td></tr>';}).join('');}
 function deleteSupply(id){if(!confirm('Delete this supply entry?'))return;DB.supplies=(DB.supplies||[]).filter(function(e){return e.id!==id;});saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();renderDashboard();ttToast('Supply entry deleted.');}
 function clearSupplyFilters(){['sfCustomer','sfFrom','sfTo'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});renderSupplyLedger();}
-function exportSupplyCSV(){var supplies=DB.supplies||[];if(!supplies.length){ttToast('No supply entries to export.');return;}var rows=[['Date','Ref','Customer','Product','Qty','Unit','Sale Price/Unit','Cost Price/Unit','Other Cost','Revenue','Cost','Profit','Margin%','Notes']];supplies.forEach(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0';rows.push([e.date,e.ref,e.customer,e.product,e.qty,e.unit,e.salePrice,e.costPrice,e.otherCost,e.revenue,e.cost,e.profit,margin,e.narr||'']);});var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='firsttoph_supply_'+ttToday()+'.csv';a.click();}
+function exportSupplyCSV(){var supplies=DB.supplies||[];if(!supplies.length){ttToast('No supply entries to export.');return;}var rows=[['Date','Ref','Customer','Products','Revenue','Base Cost','Additional Costs','Additional Cost Detail','Total Cost','Profit','Margin%','Notes']];supplies.forEach(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0';var addlDetail=(e.additionalCosts||[]).map(function(c){return c.costType+(c.desc?'('+c.desc+')':'')+': ₦'+ttFmt(c.amount);}).join(' | ');rows.push([e.date,e.ref,e.customer,e.product,e.revenue,(e.cost-(e.additionalTotal||0)),e.additionalTotal||0,addlDetail,e.cost,e.profit,margin,e.narr||'']);});var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='firsttoph_supply_'+ttToday()+'.csv';a.click();}
 
 function ttFmt(n){return Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
