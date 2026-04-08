@@ -614,6 +614,7 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                           <optgroup label="VENDOR">
                             <option value="vendor_advance">Advance / Payment to Vendor</option>
                             <option value="vendor_delivery">Goods Delivered by Vendor</option>
+                            <option value="vendor_refund">Money Refund from Vendor</option>
                           </optgroup>
                           <optgroup label="COMPANY">
                             <option value="company_supply">Goods Supplied to Company</option>
@@ -722,7 +723,10 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                     <div class="tt-fg"><label>Amount (₦)</label><input type="number" id="expAmount" min="0" step="0.01" placeholder="0.00" oninput="updateExpTotal()"></div>
                   </div>
                   <div class="tt-form-row"><div class="tt-fg full"><label>Description / Narration</label><input type="text" id="expDesc" placeholder="e.g. Diesel for generator…"></div></div>
-                  <div class="tt-form-row"><div class="tt-fg full"><label>Paid By</label><select id="expPaidBy"><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="POS">POS</option><option value="Cheque">Cheque</option></select></div></div>
+                  <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
+                    <div class="tt-fg"><label>Paid By</label><select id="expPaidBy"><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="POS">POS</option><option value="Cheque">Cheque</option></select></div>
+                    <div class="tt-fg"><label>Attach to Vendor / Company <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">(optional — adds to balance)</span></label><select id="expVendor"><option value="">— None —</option></select></div>
+                  </div>
                   <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
                     <div class="tt-fg"><label>Today's Total Expenses</label><input type="text" id="expTodayTotal" readonly></div>
                     <div class="tt-fg"><label>Month's Total Expenses</label><input type="text" id="expMonthTotal" readonly></div>
@@ -751,7 +755,7 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                 <button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="clearExpFilters()">Reset</button>
               </div>
             </div>
-            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Category</th><th>Description</th><th>Paid By</th><th>Amount (₦)</th><th>Attach</th><th></th></tr></thead><tbody id="expLedgerBody"></tbody></table></div>
+            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Category</th><th>Description</th><th>Paid By</th><th>Vendor / Co.</th><th>Amount (₦)</th><th>Attach</th><th></th></tr></thead><tbody id="expLedgerBody"></tbody></table></div>
             <div id="expLedgerEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">💸</div>No expenses found.</div>
           </div>
         </div>
@@ -856,6 +860,28 @@ input[type=number] { font-family: 'DM Mono', monospace; }
     <!-- TT Delete Modal -->
     <div class="tt-modal-overlay" id="delModal" style="display:none;">
       <div class="tt-modal"><div class="tt-modal-hdr"><span class="tt-modal-title">Confirm Delete</span><button class="tt-modal-close" onclick="closeDel()">×</button></div><div class="tt-modal-body"><p style="font-size:13px;color:var(--tt-ink2);margin-bottom:14px;">Delete this transaction? The account balance will be reversed.</p><div id="delPreview" style="background:var(--tt-surface2);border-radius:6px;padding:11px;font-size:12px;margin-bottom:14px;line-height:1.7;border:1px solid var(--tt-border);color:var(--tt-ink2);"></div><div class="tt-btn-row"><button class="tt-btn tt-btn-danger" onclick="confirmDel()">Delete & Reverse</button><button class="tt-btn tt-btn-ghost" onclick="closeDel()">Cancel</button></div></div></div>
+    </div>
+    <!-- TT View Transaction Modal -->
+    <div class="tt-modal-overlay" id="viewTxModal" style="display:none;">
+      <div class="tt-modal" style="max-width:600px;">
+        <div class="tt-modal-hdr"><span class="tt-modal-title" id="viewTxTitle">Transaction Detail</span><button class="tt-modal-close" onclick="document.getElementById('viewTxModal').style.display='none'">×</button></div>
+        <div class="tt-modal-body" id="viewTxBody"></div>
+      </div>
+    </div>
+    <!-- TT Edit Transaction Modal -->
+    <div class="tt-modal-overlay" id="editTxModal" style="display:none;">
+      <div class="tt-modal" style="max-width:520px;">
+        <div class="tt-modal-hdr"><span class="tt-modal-title">Edit Transaction</span><button class="tt-modal-close" onclick="document.getElementById('editTxModal').style.display='none'">×</button></div>
+        <div class="tt-modal-body">
+          <p style="font-size:11px;color:var(--tt-ink3);margin-bottom:14px;">Only non-financial fields can be edited to preserve balance integrity. To change amount, delete and re-enter.</p>
+          <div class="tt-form-grid">
+            <div class="tt-fg"><label>Date</label><input type="date" id="editTxDate"></div>
+            <div class="tt-fg"><label>Narration / Notes</label><input type="text" id="editTxNarr" placeholder="Update narration…"></div>
+          </div>
+          <input type="hidden" id="editTxId">
+          <div class="tt-btn-row" style="margin-top:14px;"><button class="tt-btn tt-btn-primary" onclick="saveEditTx()">Save Changes</button><button class="tt-btn tt-btn-ghost" onclick="document.getElementById('editTxModal').style.display='none'">Cancel</button></div>
+        </div>
+      </div>
     </div>
     <!-- TT Attachment Modal -->
     <div class="tt-modal-overlay" id="viewAttachModal" style="display:none;">
@@ -1195,6 +1221,7 @@ function getTxMeta(type){
   const map={
     vendor_advance: {label:'Vendor Advance',party:'vendor',balDelta:-1,useItems:false,debit:true,creditEffect:'Payment to vendor (negative balance)'},
     vendor_delivery:{label:'Goods by Vendor',party:'vendor',balDelta:+1,useItems:true,debit:false,creditEffect:'Goods received reduce vendor debt'},
+    vendor_refund:  {label:'Money Refund',party:'vendor',balDelta:+1,useItems:false,debit:false,creditEffect:'Refund from vendor reduces their balance (you get money back)'},
     company_supply: {label:'Supply to Company',party:'company',balDelta:+1,useItems:true,debit:true,creditEffect:'Company owes you for goods'},
     company_payment:{label:'Payment from Company',party:'company',balDelta:-1,useItems:false,debit:false,creditEffect:'Company payment reduces their debt'},
   };
@@ -1213,6 +1240,7 @@ function ttInit(){
   document.getElementById('expRefPreview').textContent='Ref: EXP-'+String(DB.expCounter+1).padStart(4,'0');
   if(DB.entities.length===0)seedDemo();
   ttRenderAll();
+  populateExpVendorDropdown();
   if(!supLineItems.length)addSupplyLine();
 }
 
@@ -1235,7 +1263,7 @@ function ttShowTab(el,id){
   if(id==='dashboard')renderDashboard();
   if(id==='ledger'){populateLedgerFilter();renderLedger();}
   if(id==='accounts')renderAccounts();
-  if(id==='expenses'){renderExpenses();renderExpSummary();}
+  if(id==='expenses'){populateExpVendorDropdown();renderExpenses();renderExpSummary();}
   if(id==='supply'){renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();if(!supLineItems.length)addSupplyLine();}
   if(id==='manage')renderManage();
 }
@@ -1328,7 +1356,7 @@ function renderLedger(){
   if(fType){const ids=DB.entities.filter(e=>e.type===fType).map(e=>e.id);txs=txs.filter(t=>ids.includes(t.entityId));}
   if(fAcc)txs=txs.filter(t=>t.entityId===fAcc);if(fFrom)txs=txs.filter(t=>t.date>=fFrom);if(fTo)txs=txs.filter(t=>t.date<=fTo);
   document.getElementById('ledgerEmpty').style.display=txs.length?'none':'block';if(!txs.length){document.getElementById('ledgerBody').innerHTML='';return;}
-  let h='';txs.forEach(tx=>{const e=DB.entities.find(x=>x.id===tx.entityId),meta=getTxMeta(tx.type),isDebit=tx.sign>0,debit=isDebit?'₦'+ttFmt(tx.amount):'—',credit=!isDebit?'₦'+ttFmt(tx.amount):'—',balNeg=tx.balAfter<0;let narr='';if(tx.items?.length){narr=tx.items.map(i=>`<span>${i.desc} &nbsp; <b>${i.qty} ${i.unit}</b> × ₦${ttFmt(i.price)} = <b>₦${ttFmt(i.amt)}</b></span>`).join('<br>');}else{narr=`<span>${tx.narration||''}</span>`;}const attachBtn=tx.attachment?`<span class="tt-attach-link" onclick='viewAttach(${JSON.stringify(tx.id)})'>📎 ${tx.attachment.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${tx.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${tx.ref}</td><td><span class="tt-badge ${e?.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${meta?.label||tx.type}</span></td><td style="font-size:12px;font-weight:600;color:var(--tt-ink)">${e?.name||'?'}</td><td class="tt-narr-text" style="max-width:220px;">${narr}</td><td class="tt-amt-debit">${debit}</td><td class="tt-amt-credit">${credit}</td><td class="tt-amt-bal ${balNeg?'neg':'pos'}">${tx.balAfter<0?'−':''}₦${ttFmt(Math.abs(tx.balAfter))}</td><td>${attachBtn}</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="openDel('${tx.id}')">✕</button></td></tr>`;});
+  let h='';txs.forEach(tx=>{const e=DB.entities.find(x=>x.id===tx.entityId),meta=getTxMeta(tx.type),isDebit=tx.sign>0,debit=isDebit?'₦'+ttFmt(tx.amount):'—',credit=!isDebit?'₦'+ttFmt(tx.amount):'—',balNeg=tx.balAfter<0;let narr='';if(tx.items?.length){narr=tx.items.map(i=>`<span>${i.desc} &nbsp; <b>${i.qty} ${i.unit}</b> × ₦${ttFmt(i.price)} = <b>₦${ttFmt(i.amt)}</b></span>`).join('<br>');}else{narr=`<span>${tx.narration||''}</span>`;}const attachBtn=tx.attachment?`<span class="tt-attach-link" onclick='viewAttach(${JSON.stringify(tx.id)})'>📎 ${tx.attachment.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${tx.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${tx.ref}</td><td><span class="tt-badge ${e?.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${meta?.label||tx.type}</span></td><td style="font-size:12px;font-weight:600;color:var(--tt-ink)">${e?.name||'?'}</td><td class="tt-narr-text" style="max-width:220px;">${narr}</td><td class="tt-amt-debit">${debit}</td><td class="tt-amt-credit">${credit}</td><td class="tt-amt-bal ${balNeg?'neg':'pos'}">${tx.balAfter<0?'−':''}₦${ttFmt(Math.abs(tx.balAfter))}</td><td>${attachBtn}</td><td style="white-space:nowrap;"><button class="tt-btn tt-btn-sm tt-btn-ghost" style="margin-right:3px;" onclick="openViewTx('${tx.id}')">👁</button><button class="tt-btn tt-btn-sm tt-btn-ghost" style="margin-right:3px;" onclick="openEditTx('${tx.id}')">✏️</button><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="openDel('${tx.id}')">✕</button></td></tr>`;});
   document.getElementById('ledgerBody').innerHTML=h;
 }
 function clearFilters(){['fType','fAccount','fFrom','fTo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderLedger();}
@@ -1366,6 +1394,77 @@ function openDel(id){pendingDel=id;const tx=DB.transactions.find(t=>t.id===id),e
 function closeDel(){document.getElementById('delModal').style.display='none';pendingDel=null;}
 function confirmDel(){const tx=DB.transactions.find(t=>t.id===pendingDel);if(tx){const meta=getTxMeta(tx.type),e=DB.entities.find(x=>x.id===tx.entityId);if(e)e.balance-=meta.balDelta*tx.amount;DB.transactions=DB.transactions.filter(t=>t.id!==pendingDel);saveDB();ttRenderAll();if(document.getElementById('tt-tab-ledger').classList.contains('active')){populateLedgerFilter();renderLedger();}ttToast('Transaction deleted. Balance reversed.');}closeDel();}
 
+function openViewTx(id){
+  const tx=DB.transactions.find(t=>t.id===id);if(!tx)return;
+  const e=DB.entities.find(x=>x.id===tx.entityId),meta=getTxMeta(tx.type),isDebit=tx.sign>0;
+  document.getElementById('viewTxTitle').textContent=tx.ref+' — '+( meta?.label||tx.type);
+  let itemsHtml='';
+  if(tx.items&&tx.items.length){itemsHtml=`<div style="margin-top:10px;"><div class="tt-section-divider">Line Items</div><table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;"><thead><tr style="background:var(--tt-surface2);"><th style="padding:5px 8px;text-align:left;color:var(--tt-ink3);border-bottom:1px solid var(--tt-border);">Description</th><th style="padding:5px 8px;text-align:right;color:var(--tt-ink3);border-bottom:1px solid var(--tt-border);">Qty</th><th style="padding:5px 8px;text-align:left;color:var(--tt-ink3);border-bottom:1px solid var(--tt-border);">Unit</th><th style="padding:5px 8px;text-align:right;color:var(--tt-ink3);border-bottom:1px solid var(--tt-border);">Price</th><th style="padding:5px 8px;text-align:right;color:var(--tt-ink3);border-bottom:1px solid var(--tt-border);">Amount</th></tr></thead><tbody>`+tx.items.map(i=>`<tr><td style="padding:5px 8px;border-bottom:1px solid var(--tt-border);color:var(--tt-ink2);">${i.desc}</td><td style="padding:5px 8px;border-bottom:1px solid var(--tt-border);text-align:right;font-family:'DM Mono',monospace;">${i.qty}</td><td style="padding:5px 8px;border-bottom:1px solid var(--tt-border);color:var(--tt-ink3);">${i.unit}</td><td style="padding:5px 8px;border-bottom:1px solid var(--tt-border);text-align:right;font-family:'DM Mono',monospace;">₦${ttFmt(i.price)}</td><td style="padding:5px 8px;border-bottom:1px solid var(--tt-border);text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-blue);">₦${ttFmt(i.amt)}</td></tr>`).join('')+`</tbody></table></div>`;}
+  let attachHtml='';
+  if(tx.attachment){const att=tx.attachment;attachHtml=`<div style="margin-top:12px;"><div class="tt-section-divider">Attachment</div><div style="margin-top:6px;">`+(att.fileType?.startsWith('image/')?`<img src="${att.dataUrl}" style="max-width:100%;max-height:220px;border-radius:6px;border:1px solid var(--tt-border);">`:`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:var(--tt-surface2);border-radius:6px;border:1px solid var(--tt-border);font-size:12px;"><span style="font-size:20px;">📄</span><span style="color:var(--tt-ink2);">${att.name}</span></div>`)+`<div style="margin-top:7px;"><a href="${att.dataUrl}" download="${att.name}" class="tt-btn tt-btn-ghost tt-btn-sm">⬇ Download</a></div></div></div>`;}
+  document.getElementById('viewTxBody').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">Reference</div>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--tt-ink);">${tx.ref}</div>
+      </div>
+      <div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">Date</div>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--tt-ink);">${tx.date}</div>
+      </div>
+      <div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">Account</div>
+        <div style="font-size:13px;font-weight:600;color:var(--tt-ink);">${e?.name||'Unknown'}</div>
+        <div style="font-size:10px;color:var(--tt-ink3);text-transform:uppercase;font-family:'Syne',sans-serif;">${e?.type||''}</div>
+      </div>
+      <div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">Type</div>
+        <div><span class="tt-badge ${e?.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${meta?.label||tx.type}</span></div>
+      </div>
+      <div style="background:${isDebit?'var(--tt-blue-bg)':'var(--tt-green-bg)'};border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">${isDebit?'Debit':'Credit'}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:${isDebit?'var(--tt-blue)':'var(--tt-green)'};">₦${ttFmt(tx.amount)}</div>
+      </div>
+      <div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;">
+        <div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:3px;">Balance After</div>
+        <div style="font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:${tx.balAfter<0?'var(--tt-red)':'var(--tt-green)'};">${tx.balAfter<0?'−':''}₦${ttFmt(Math.abs(tx.balAfter))}</div>
+      </div>
+    </div>
+    ${tx.narration&&!tx.items?.length?`<div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:10px;margin-bottom:10px;"><div style="font-size:9px;color:var(--tt-ink3);text-transform:uppercase;letter-spacing:0.8px;font-family:'Syne',sans-serif;margin-bottom:4px;">Narration</div><div style="font-size:12px;color:var(--tt-ink2);line-height:1.6;">${tx.narration}</div></div>`:''}
+    ${itemsHtml}${attachHtml}
+    <div class="tt-btn-row" style="margin-top:14px;">
+      <button class="tt-btn tt-btn-ghost" onclick="document.getElementById('viewTxModal').style.display='none';openEditTx('${tx.id}')">✏️ Edit</button>
+      <button class="tt-btn tt-btn-danger" onclick="document.getElementById('viewTxModal').style.display='none';openDel('${tx.id}')">✕ Delete</button>
+      <button class="tt-btn tt-btn-ghost" onclick="document.getElementById('viewTxModal').style.display='none'">Close</button>
+    </div>`;
+  document.getElementById('viewTxModal').style.display='flex';
+}
+
+function openEditTx(id){
+  const tx=DB.transactions.find(t=>t.id===id);if(!tx)return;
+  document.getElementById('editTxId').value=id;
+  document.getElementById('editTxDate').value=tx.date;
+  /* For item-based transactions, narration is auto-generated; for direct, expose it */
+  document.getElementById('editTxNarr').value=tx.items&&tx.items.length?'':tx.narration||'';
+  document.getElementById('editTxNarr').placeholder=tx.items&&tx.items.length?'(Narration auto-generated from items — not editable here)':'Update narration…';
+  document.getElementById('editTxNarr').disabled=!!(tx.items&&tx.items.length);
+  document.getElementById('editTxModal').style.display='flex';
+}
+
+function saveEditTx(){
+  const id=document.getElementById('editTxId').value;
+  const tx=DB.transactions.find(t=>t.id===id);if(!tx){ttToast('⚠ Transaction not found.');return;}
+  const newDate=document.getElementById('editTxDate').value;
+  if(!newDate){ttToast('⚠ Please select a date.');return;}
+  tx.date=newDate;
+  if(!(tx.items&&tx.items.length)){tx.narration=document.getElementById('editTxNarr').value.trim()||tx.narration;}
+  saveDB();
+  document.getElementById('editTxModal').style.display='none';
+  if(document.getElementById('tt-tab-ledger').classList.contains('active')){populateLedgerFilter();renderLedger();}
+  renderDashboard();
+  ttToast('✓ Transaction updated — '+tx.ref);
+}
+
 function viewAttach(txId){const tx=DB.transactions.find(t=>t.id===txId);if(!tx?.attachment)return;const att=tx.attachment;document.getElementById('attachModalTitle').textContent=att.name;let body='';if(att.fileType?.startsWith('image/')){body=`<img src="${att.dataUrl}" style="max-width:100%;max-height:70vh;border-radius:6px;">`;}else{body=`<iframe src="${att.dataUrl}" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>`;}body+=`<div style="margin-top:11px;"><a href="${att.dataUrl}" download="${att.name}" class="tt-btn tt-btn-ghost tt-btn-sm">⬇ Download</a></div>`;document.getElementById('attachModalBody').innerHTML=body;document.getElementById('viewAttachModal').style.display='flex';}
 function closeAttach(){document.getElementById('viewAttachModal').style.display='none';}
 
@@ -1377,18 +1476,21 @@ function onExpDragOver(e){e.preventDefault();document.getElementById('expAttachZ
 function onExpDrop(e){e.preventDefault();document.getElementById('expAttachZone').style.borderColor='';if(e.dataTransfer.files.length)processExpFile(e.dataTransfer.files[0]);}
 function processExpFile(file){if(!file)return;const reader=new FileReader();reader.onload=ev=>{currentExpFile={name:file.name,dataUrl:ev.target.result,type:file.type};const zone=document.getElementById('expAttachZone'),prev=document.getElementById('expAttachPreview');zone.classList.add('has-file');if(file.type.startsWith('image/')){prev.innerHTML=`<img src="${ev.target.result}" class="tt-attach-thumb"><div class="tt-attach-filename">📷 ${file.name}</div>`;}else{prev.innerHTML=`<div class="tt-pdf-icon">📄</div><div class="tt-attach-filename">📄 ${file.name}</div>`;}};reader.readAsDataURL(file);}
 function resetExpAttachZone(){document.getElementById('expAttachZone').classList.remove('has-file');document.getElementById('expAttachPreview').innerHTML='';document.getElementById('expFileInput').value='';}
+function populateExpVendorDropdown(){const sel=document.getElementById('expVendor');if(!sel)return;const cur=sel.value;sel.innerHTML='<option value="">— None —</option>';const vendors=DB.entities.filter(e=>e.type==='vendor'),companies=DB.entities.filter(e=>e.type==='company');if(vendors.length){const grp=document.createElement('optgroup');grp.label='VENDORS';vendors.forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.name+' [Bal: ₦'+ttFmt(e.balance)+']';grp.appendChild(o);});sel.appendChild(grp);}if(companies.length){const grp=document.createElement('optgroup');grp.label='COMPANIES';companies.forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.name+' [Bal: ₦'+ttFmt(e.balance)+']';grp.appendChild(o);});sel.appendChild(grp);}if(cur)sel.value=cur;}
 function submitExpense(){
-  const date=document.getElementById('expDate').value,category=document.getElementById('expCategory').value,amount=parseFloat(document.getElementById('expAmount').value)||0,desc=document.getElementById('expDesc').value.trim(),paidBy=document.getElementById('expPaidBy').value;
+  const date=document.getElementById('expDate').value,category=document.getElementById('expCategory').value,amount=parseFloat(document.getElementById('expAmount').value)||0,desc=document.getElementById('expDesc').value.trim(),paidBy=document.getElementById('expPaidBy').value,vendorId=document.getElementById('expVendor')?.value||'';
   if(!date){ttToast('⚠ Please select a date.');return;}if(amount<=0){ttToast('⚠ Please enter a valid amount.');return;}if(!desc){ttToast('⚠ Please add a description.');return;}
-  DB.expCounter++;const exp={id:'exp'+Date.now(),ref:'EXP-'+String(DB.expCounter).padStart(4,'0'),date,category,amount,desc,paidBy,attachment:currentExpFile?{name:currentExpFile.name,dataUrl:currentExpFile.dataUrl,fileType:currentExpFile.type}:null};
+  DB.expCounter++;const exp={id:'exp'+Date.now(),ref:'EXP-'+String(DB.expCounter).padStart(4,'0'),date,category,amount,desc,paidBy,vendorId:vendorId||null,attachment:currentExpFile?{name:currentExpFile.name,dataUrl:currentExpFile.dataUrl,fileType:currentExpFile.type}:null};
+  /* If a vendor/company is attached, add the expense amount to their balance */
+  if(vendorId){const entity=DB.entities.find(e=>e.id===vendorId);if(entity){entity.balance+=amount;}}
   DB.expenses.unshift(exp);saveDB();renderExpenses();renderExpSummary();renderDashboard();clearExpForm();document.getElementById('expRefPreview').textContent='Ref: EXP-'+String(DB.expCounter+1).padStart(4,'0');ttToast(`✓ ${exp.ref} saved — ${category} — ₦${ttFmt(amount)}`);
 }
-function clearExpForm(){document.getElementById('expAmount').value='';document.getElementById('expDesc').value='';document.getElementById('expPaidBy').value='Cash';document.getElementById('expCategory').value='Fuel';document.getElementById('expTodayTotal').value='';document.getElementById('expMonthTotal').value='';currentExpFile=null;resetExpAttachZone();updateExpTotal();}
+function clearExpForm(){document.getElementById('expAmount').value='';document.getElementById('expDesc').value='';document.getElementById('expPaidBy').value='Cash';document.getElementById('expCategory').value='Fuel';if(document.getElementById('expVendor'))document.getElementById('expVendor').value='';document.getElementById('expTodayTotal').value='';document.getElementById('expMonthTotal').value='';currentExpFile=null;resetExpAttachZone();updateExpTotal();}
 function renderExpenses(){
   const efCat=document.getElementById('efCategory')?.value||'',efFrom=document.getElementById('efFrom')?.value||'',efTo=document.getElementById('efTo')?.value||'';
   let exps=[...DB.expenses];if(efCat)exps=exps.filter(e=>e.category===efCat);if(efFrom)exps=exps.filter(e=>e.date>=efFrom);if(efTo)exps=exps.filter(e=>e.date<=efTo);
   document.getElementById('expLedgerEmpty').style.display=exps.length?'none':'block';if(!exps.length){document.getElementById('expLedgerBody').innerHTML='';return;}
-  let h='';exps.forEach(exp=>{const attachBtn=exp.attachment?`<span class="tt-attach-link" onclick='viewExpAttach("${exp.id}")'>📎 ${exp.attachment.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${exp.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${exp.ref}</td><td><span class="tt-cat-pill">${exp.category}</span></td><td style="font-size:12px;color:var(--tt-ink2);">${exp.desc}</td><td style="font-size:11px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">${exp.paidBy}</td><td class="tt-amt-debit">₦${ttFmt(exp.amount)}</td><td>${attachBtn}</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteExpense('${exp.id}')">✕</button></td></tr>`;});
+  let h='';exps.forEach(exp=>{const attachBtn=exp.attachment?`<span class="tt-attach-link" onclick='viewExpAttach("${exp.id}")'>📎 ${exp.attachment.name}</span>`:'—';const vendorEnt=exp.vendorId?DB.entities.find(e=>e.id===exp.vendorId):null;const vendorCell=vendorEnt?`<span class="tt-badge ${vendorEnt.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${vendorEnt.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${exp.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${exp.ref}</td><td><span class="tt-cat-pill">${exp.category}</span></td><td style="font-size:12px;color:var(--tt-ink2);">${exp.desc}</td><td style="font-size:11px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">${exp.paidBy}</td><td style="font-size:11px;">${vendorCell}</td><td class="tt-amt-debit">₦${ttFmt(exp.amount)}</td><td>${attachBtn}</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteExpense('${exp.id}')">✕</button></td></tr>`;});
   document.getElementById('expLedgerBody').innerHTML=h;
 }
 function renderExpSummary(){
@@ -1399,7 +1501,7 @@ function renderExpSummary(){
   const cats={};allExps.forEach(e=>{cats[e.category]=(cats[e.category]||0)+e.amount;});const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);const catEl=document.getElementById('expCatBreakdown');if(!sorted.length){catEl.innerHTML='';return;}
   catEl.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;">'+sorted.map(([cat,amt])=>{const pct=allTotal?Math.round(amt/allTotal*100):0;return`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;"><span style="font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--tt-ink)">${cat}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--tt-red);">₦${ttFmt(amt)} <span style="color:var(--tt-ink3);font-size:10px;">(${pct}%)</span></span></div><div style="height:5px;background:var(--tt-surface3);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--tt-red);border-radius:3px;transition:width 0.4s;"></div></div></div>`;}).join('')+'</div>';
 }
-function deleteExpense(id){if(!confirm('Delete this expense?'))return;DB.expenses=DB.expenses.filter(e=>e.id!==id);saveDB();renderExpenses();renderExpSummary();renderDashboard();ttToast('Expense deleted.');}
+function deleteExpense(id){if(!confirm('Delete this expense?'))return;const exp=DB.expenses.find(e=>e.id===id);if(exp&&exp.vendorId){const entity=DB.entities.find(e=>e.id===exp.vendorId);if(entity)entity.balance-=exp.amount;}DB.expenses=DB.expenses.filter(e=>e.id!==id);saveDB();renderExpenses();renderExpSummary();renderDashboard();ttToast('Expense deleted.');}
 function viewExpAttach(expId){const exp=DB.expenses.find(e=>e.id===expId);if(!exp?.attachment)return;const att=exp.attachment;document.getElementById('attachModalTitle').textContent=att.name;let body='';if(att.fileType?.startsWith('image/')){body=`<img src="${att.dataUrl}" style="max-width:100%;max-height:70vh;border-radius:6px;">`;}else{body=`<iframe src="${att.dataUrl}" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>`;}body+=`<div style="margin-top:11px;"><a href="${att.dataUrl}" download="${att.name}" class="tt-btn tt-btn-ghost tt-btn-sm">⬇ Download</a></div>`;document.getElementById('attachModalBody').innerHTML=body;document.getElementById('viewAttachModal').style.display='flex';}
 function clearExpFilters(){['efCategory','efFrom','efTo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderExpenses();}
 function exportExpCSV(){const rows=[['Date','Ref','Category','Description','Paid By','Amount (₦)','Attachment']];DB.expenses.forEach(exp=>{rows.push([exp.date,exp.ref,exp.category,'"'+(exp.desc||'').replace(/"/g,'""')+'"',exp.paidBy,exp.amount,exp.attachment?exp.attachment.name:'']);});const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='FGV_EXPENSES_'+ttToday()+'.csv';a.click();}
