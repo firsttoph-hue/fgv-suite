@@ -574,6 +574,8 @@ input[type=number] { font-family: 'DM Mono', monospace; }
         <div class="tt-nav-tab" data-tab="accounts" onclick="ttShowTab(this,'accounts')">Accounts</div>
         <div class="tt-nav-tab" data-tab="expenses" onclick="ttShowTab(this,'expenses')">Daily Expenses</div>
         <div class="tt-nav-tab" data-tab="supply" onclick="ttShowTab(this,'supply')">📦 Supply Account</div>
+        <div class="tt-nav-tab" data-tab="fgvbank" onclick="ttShowTab(this,'fgvbank')">🏦 FGV Bank</div>
+        <div class="tt-nav-tab" data-tab="incexp" onclick="ttShowTab(this,'incexp')">📑 Income &amp; Expenditure</div>
         <div class="tt-nav-tab" data-tab="manage" onclick="ttShowTab(this,'manage')">Manage</div>
       </div>
 
@@ -615,6 +617,7 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                             <option value="vendor_advance">Advance / Payment to Vendor</option>
                             <option value="vendor_delivery">Goods Delivered by Vendor</option>
                             <option value="vendor_refund">Money Refund from Vendor</option>
+                            <option value="vendor_balance_goods">Balance for Goods (Auto-Deduct)</option>
                           </optgroup>
                           <optgroup label="COMPANY">
                             <option value="company_supply">Goods Supplied to Company</option>
@@ -719,13 +722,12 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                 <div class="tt-form-grid">
                   <div class="tt-form-row" style="grid-template-columns:135px 1fr 1fr;">
                     <div class="tt-fg"><label>Date</label><input type="date" id="expDate"></div>
-                    <div class="tt-fg"><label>Category</label><select id="expCategory"><option value="Fuel">⛽ Fuel</option><option value="Transport">🚗 Transport</option><option value="Food & Meals">🍽 Food &amp; Meals</option><option value="Office Supplies">📦 Office Supplies</option><option value="Utilities">💡 Utilities</option><option value="Communication">📞 Communication</option><option value="Repairs & Maintenance">🔧 Repairs &amp; Maintenance</option><option value="Staff Welfare">👥 Staff Welfare</option><option value="Security">🔒 Security</option><option value="Medical">🏥 Medical</option><option value="Bank Charges">🏦 Bank Charges</option><option value="Miscellaneous">📋 Miscellaneous</option></select></div>
+                    <div class="tt-fg"><label>Category</label><select id="expCategory"><option value="Administration Expenses">🗂 Administration Expenses</option><option value="Operational">⚙️ Operational</option><option value="Fuel">⛽ Fuel</option><option value="Transport">🚗 Transport</option><option value="Food & Meals">🍽 Food &amp; Meals</option><option value="Office Supplies">📦 Office Supplies</option><option value="Utilities">💡 Utilities</option><option value="Communication">📞 Communication</option><option value="Repairs & Maintenance">🔧 Repairs &amp; Maintenance</option><option value="Staff Welfare">👥 Staff Welfare</option><option value="Security">🔒 Security</option><option value="Medical">🏥 Medical</option><option value="Bank Charges">🏦 Bank Charges</option><option value="Miscellaneous">📋 Miscellaneous</option></select></div>
                     <div class="tt-fg"><label>Amount (₦)</label><input type="number" id="expAmount" min="0" step="0.01" placeholder="0.00" oninput="updateExpTotal()"></div>
                   </div>
                   <div class="tt-form-row"><div class="tt-fg full"><label>Description / Narration</label><input type="text" id="expDesc" placeholder="e.g. Diesel for generator…"></div></div>
-                  <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
+                  <div class="tt-form-row" style="grid-template-columns:1fr;">
                     <div class="tt-fg"><label>Paid By</label><select id="expPaidBy"><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option><option value="POS">POS</option><option value="Cheque">Cheque</option></select></div>
-                    <div class="tt-fg"><label>Attach to Vendor / Company <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">(optional — adds to balance)</span></label><select id="expVendor"><option value="">— None —</option></select></div>
                   </div>
                   <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
                     <div class="tt-fg"><label>Today's Total Expenses</label><input type="text" id="expTodayTotal" readonly></div>
@@ -749,13 +751,13 @@ input[type=number] { font-family: 'DM Mono', monospace; }
             <div class="tt-panel-header"><span class="tt-panel-title">📋 Expenses Ledger</span><button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="exportExpCSV()">⬇ Export CSV</button></div>
             <div class="tt-panel-body" style="padding-bottom:0;">
               <div class="tt-filter-bar">
-                <select id="efCategory" onchange="renderExpenses()"><option value="">All Categories</option><option value="Fuel">Fuel</option><option value="Transport">Transport</option><option value="Food & Meals">Food &amp; Meals</option><option value="Office Supplies">Office Supplies</option><option value="Utilities">Utilities</option><option value="Communication">Communication</option><option value="Repairs & Maintenance">Repairs &amp; Maintenance</option><option value="Staff Welfare">Staff Welfare</option><option value="Security">Security</option><option value="Medical">Medical</option><option value="Bank Charges">Bank Charges</option><option value="Miscellaneous">Miscellaneous</option></select>
+                <select id="efCategory" onchange="renderExpenses()"><option value="">All Categories</option><option value="Administration Expenses">Administration Expenses</option><option value="Operational">Operational</option><option value="Fuel">Fuel</option><option value="Transport">Transport</option><option value="Food & Meals">Food &amp; Meals</option><option value="Office Supplies">Office Supplies</option><option value="Utilities">Utilities</option><option value="Communication">Communication</option><option value="Repairs & Maintenance">Repairs &amp; Maintenance</option><option value="Staff Welfare">Staff Welfare</option><option value="Security">Security</option><option value="Medical">Medical</option><option value="Bank Charges">Bank Charges</option><option value="Miscellaneous">Miscellaneous</option></select>
                 <input type="date" id="efFrom" onchange="renderExpenses()">
                 <input type="date" id="efTo" onchange="renderExpenses()">
                 <button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="clearExpFilters()">Reset</button>
               </div>
             </div>
-            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Category</th><th>Description</th><th>Paid By</th><th>Vendor / Co.</th><th>Amount (₦)</th><th>Attach</th><th></th></tr></thead><tbody id="expLedgerBody"></tbody></table></div>
+            <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Category</th><th>Description</th><th>Paid By</th><th>Amount (₦)</th><th>Attach</th><th></th></tr></thead><tbody id="expLedgerBody"></tbody></table></div>
             <div id="expLedgerEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">💸</div>No expenses found.</div>
           </div>
         </div>
@@ -806,6 +808,10 @@ input[type=number] { font-family: 'DM Mono', monospace; }
                   </div>
 
                   <div class="tt-section-divider" style="margin-top:3px;">Computed Financials</div>
+                  <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
+                    <div class="tt-fg"><label>Transport Cost (₦) <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">added to total cost</span></label><input type="number" id="supTransportCost" min="0" step="0.01" placeholder="0.00" oninput="calcSupplyTotals()"></div>
+                    <div class="tt-fg"><label>Other Expenses (₦) <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">added to total cost</span></label><input type="number" id="supOtherExpenses" min="0" step="0.01" placeholder="0.00" oninput="calcSupplyTotals()"></div>
+                  </div>
                   <div class="tt-form-row" style="grid-template-columns:1fr 1fr 1fr;">
                     <div class="tt-fg"><label>Total Supply Amount (₦)</label><input type="text" id="supTotalRevenue" readonly></div>
                     <div class="tt-fg"><label>Total Cost (₦) <span style="font-size:9px;color:var(--tt-ink3);font-weight:400;">(incl. addl. costs)</span></label><input class="neg-readonly" type="text" id="supTotalCost" readonly></div>
@@ -828,6 +834,200 @@ input[type=number] { font-family: 'DM Mono', monospace; }
             </div>
             <div style="overflow-x:auto;"><table class="tt-exp-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Customer</th><th>Product / Details</th><th>Supply Amt (₦)</th><th>Total Cost (₦)</th><th>Profit (₦)</th><th>Margin %</th><th></th></tr></thead><tbody id="supplyLedgerBody"></tbody></table></div>
             <div id="supplyLedgerEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">📦</div>No supply entries found.</div>
+          </div>
+        </div>
+
+        <!-- FGV BANK -->
+        <div class="tt-tab-pane" id="tt-tab-fgvbank">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;" id="bankStatGrid"></div>
+          <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start;">
+            <div>
+              <!-- Credit FGV Bank (Income) -->
+              <div class="tt-panel" style="margin-bottom:14px;">
+                <div class="tt-panel-header"><span class="tt-panel-title">💳 Credit FGV Bank (Income / Receipt)</span><span id="bankCrRefPreview" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--tt-ink3);"></span></div>
+                <div class="tt-panel-body">
+                  <div class="tt-form-grid">
+                    <div class="tt-form-row" style="grid-template-columns:140px 1fr 1fr;">
+                      <div class="tt-fg"><label>Date</label><input type="date" id="bankCrDate"></div>
+                      <div class="tt-fg"><label>Income Type</label>
+                        <select id="bankCrType">
+                          <option value="vendor_refund">Refund from Vendor</option>
+                          <option value="company_payment">Payment from Company</option>
+                          <option value="other_income">Other Income</option>
+                        </select>
+                      </div>
+                      <div class="tt-fg"><label>Amount (₦)</label><input type="number" id="bankCrAmt" min="0" step="0.01" placeholder="0.00" oninput="updateBankPreview()"></div>
+                    </div>
+                    <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
+                      <div class="tt-fg"><label>From (Entity / Source)</label><input type="text" id="bankCrSource" placeholder="e.g. Alpha Supplies Ltd"></div>
+                      <div class="tt-fg"><label>Narration</label><input type="text" id="bankCrNarr" placeholder="Brief description…"></div>
+                    </div>
+                    <div style="background:var(--tt-green-bg);border:1px solid var(--tt-border);border-radius:7px;padding:9px 13px;font-size:12px;color:var(--tt-green);margin-bottom:8px;">
+                      ✅ <b>Accounting Effect:</b> DR FGV Bank &nbsp;|&nbsp; CR Income Account — balance increases
+                    </div>
+                    <div class="tt-btn-row"><button class="tt-btn tt-btn-primary" onclick="submitBankCredit()">Post Credit (Income)</button></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Debit FGV Bank (Expenditure) -->
+              <div class="tt-panel">
+                <div class="tt-panel-header"><span class="tt-panel-title">💸 Debit FGV Bank (Payment / Expenditure)</span><span id="bankDrRefPreview" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--tt-ink3);"></span></div>
+                <div class="tt-panel-body">
+                  <div class="tt-form-grid">
+                    <div class="tt-form-row" style="grid-template-columns:140px 1fr 1fr;">
+                      <div class="tt-fg"><label>Date</label><input type="date" id="bankDrDate"></div>
+                      <div class="tt-fg"><label>Expense Type</label>
+                        <select id="bankDrType">
+                          <option value="advance_payment">Advance Payment to Vendor</option>
+                          <option value="daily_expense">Daily / Running Expense</option>
+                          <option value="salary">Staff Salary / Remuneration</option>
+                          <option value="transport">Transport Cost</option>
+                          <option value="utility">Utility / Overhead</option>
+                          <option value="other_expense">Other Expenditure</option>
+                        </select>
+                      </div>
+                      <div class="tt-fg"><label>Amount (₦)</label><input type="number" id="bankDrAmt" min="0" step="0.01" placeholder="0.00" oninput="updateBankPreview()"></div>
+                    </div>
+                    <div class="tt-form-row" style="grid-template-columns:1fr 1fr;">
+                      <div class="tt-fg"><label>Paid To (Entity / Payee)</label><input type="text" id="bankDrPayee" placeholder="e.g. Vendor name / staff"></div>
+                      <div class="tt-fg"><label>Narration</label><input type="text" id="bankDrNarr" placeholder="Brief description…"></div>
+                    </div>
+                    <div style="background:var(--tt-red-bg);border:1px solid var(--tt-border);border-radius:7px;padding:9px 13px;font-size:12px;color:var(--tt-red);margin-bottom:8px;">
+                      🔴 <b>Accounting Effect:</b> DR Expenditure Account &nbsp;|&nbsp; CR FGV Bank — balance decreases
+                    </div>
+                    <div class="tt-btn-row"><button class="tt-btn tt-btn-danger" onclick="submitBankDebit()">Post Debit (Expenditure)</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- FGV Bank Summary -->
+            <div>
+              <div class="tt-panel" style="margin-bottom:14px;">
+                <div class="tt-panel-header"><span class="tt-panel-title">🏦 FGV Bank Account</span></div>
+                <div class="tt-panel-body">
+                  <div style="text-align:center;padding:14px 0;">
+                    <div style="font-size:10px;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--tt-ink3);margin-bottom:5px;">Account Balance</div>
+                    <div id="fgvBankBal" style="font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:var(--tt-green);">₦0.00</div>
+                    <div style="font-size:10px;color:var(--tt-ink3);margin-top:4px;">Current Balance (IAS Compliant)</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+                    <div style="background:var(--tt-green-bg);border:1px solid var(--tt-border);border-radius:7px;padding:9px;text-align:center;">
+                      <div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">Total Credits</div>
+                      <div id="fgvBankTotalCr" style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--tt-green);">₦0.00</div>
+                    </div>
+                    <div style="background:var(--tt-red-bg);border:1px solid var(--tt-border);border-radius:7px;padding:9px;text-align:center;">
+                      <div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px;">Total Debits</div>
+                      <div id="fgvBankTotalDr" style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--tt-red);">₦0.00</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tt-panel">
+                <div class="tt-panel-header"><span class="tt-panel-title">Recent Bank Transactions</span></div>
+                <div id="bankRecentList" style="max-height:340px;overflow-y:auto;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Full Bank Ledger -->
+          <div class="tt-panel" style="margin-top:18px;">
+            <div class="tt-panel-header"><span class="tt-panel-title">📋 FGV Bank Statement</span><button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="exportBankCSV()">⬇ Export CSV</button></div>
+            <div class="tt-panel-body" style="padding-bottom:0;">
+              <div class="tt-filter-bar">
+                <select id="bankFType" onchange="renderBankLedger()"><option value="">All Types</option><option value="credit">Credits Only</option><option value="debit">Debits Only</option></select>
+                <input type="date" id="bankFFrom" onchange="renderBankLedger()">
+                <input type="date" id="bankFTo" onchange="renderBankLedger()">
+                <button class="tt-btn tt-btn-sm tt-btn-ghost" onclick="clearBankFilters()">Reset</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="tt-exp-tbl">
+                <thead><tr><th>Date</th><th>Ref</th><th>Type</th><th>Description</th><th>Source / Payee</th><th>Dr (₦)</th><th>Cr (₦)</th><th>Balance (₦)</th><th></th></tr></thead>
+                <tbody id="bankLedgerBody"></tbody>
+              </table>
+            </div>
+            <div id="bankLedgerEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">🏦</div>No bank transactions yet.</div>
+          </div>
+        </div>
+
+        <!-- INCOME & EXPENDITURE ACCOUNT -->
+        <div class="tt-tab-pane" id="tt-tab-incexp">
+          <!-- Summary Stats -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;" id="incExpStatGrid"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+            <!-- Income Account -->
+            <div class="tt-panel">
+              <div class="tt-panel-header" style="background:var(--tt-green-bg);">
+                <span class="tt-panel-title" style="color:var(--tt-green);">📈 Income Account (Supply Profit)</span>
+                <div style="text-align:right;">
+                  <div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.6px;">Total Income</div>
+                  <div id="incAcctBal" style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--tt-green);">₦0.00</div>
+                </div>
+              </div>
+              <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+                <table class="tt-exp-tbl">
+                  <thead><tr><th>Date</th><th>Ref</th><th>Description</th><th>Amount (₦)</th><th>Running Bal (₦)</th></tr></thead>
+                  <tbody id="incAcctBody"></tbody>
+                </table>
+                <div id="incAcctEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">📈</div>No income recorded yet.</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:2px solid var(--tt-green);background:var(--tt-green-bg);padding:9px 13px;font-size:11px;">
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Entries</div><div id="incEntryCount" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-ink);">0</div></div>
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Supply Revenue</div><div id="incVendorRefunds" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-green);">₦0.00</div></div>
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Supply Cost</div><div id="incCompanyPmts" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-red);">₦0.00</div></div>
+              </div>
+            </div>
+            <!-- Expenditure Account -->
+            <div class="tt-panel">
+              <div class="tt-panel-header" style="background:var(--tt-red-bg);">
+                <span class="tt-panel-title" style="color:var(--tt-red);">📉 Expenditure Account (Daily Expenses)</span>
+                <div style="text-align:right;">
+                  <div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.6px;">Total Expenditure</div>
+                  <div id="expAcctBal" style="font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--tt-red);">₦0.00</div>
+                </div>
+              </div>
+              <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+                <table class="tt-exp-tbl">
+                  <thead><tr><th>Date</th><th>Ref</th><th>Description</th><th>Amount (₦)</th><th>Running Bal (₦)</th></tr></thead>
+                  <tbody id="expAcctBody"></tbody>
+                </table>
+                <div id="expAcctEmpty" class="tt-empty" style="display:none;"><div class="tt-empty-icon">📉</div>No expenditure recorded yet.</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:2px solid var(--tt-red);background:var(--tt-red-bg);padding:9px 13px;font-size:11px;">
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Entries</div><div id="expEntryCount" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-ink);">0</div></div>
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Today's Expenses</div><div id="expAdvances" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-red);">₦0.00</div></div>
+                <div><div style="font-size:9px;color:var(--tt-ink3);font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Daily Expenses</div><div id="expDailyTotal" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--tt-red);">₦0.00</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- IAS Surplus/Deficit Statement -->
+          <div class="tt-panel">
+            <div class="tt-panel-header"><span class="tt-panel-title">📊 Income &amp; Expenditure Statement (IAS Compliant)</span></div>
+            <div class="tt-panel-body" id="iasStatement">
+              <div style="max-width:640px;margin:0 auto;">
+                <div style="text-align:center;padding-bottom:13px;border-bottom:2px solid var(--tt-border);margin-bottom:13px;">
+                  <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--tt-ink);text-transform:uppercase;letter-spacing:1px;">FirstToph Green Venture</div>
+                  <div style="font-size:12px;color:var(--tt-ink3);margin-top:2px;">Income &amp; Expenditure Account · FY 2026</div>
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                  <tbody>
+                    <tr><td style="padding:6px 0;font-weight:700;font-family:'Syne',sans-serif;font-size:11px;text-transform:uppercase;color:var(--tt-green);">INCOME</td><td></td></tr>
+                    <tr><td style="padding:5px 16px;color:var(--tt-ink2);">Supply Profit (Net of Revenue &amp; Cost)</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_vRefunds">—</td></tr>
+                    <tr id="ias_cPay_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Company Payments Received</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_cPay">—</td></tr>
+                    <tr id="ias_otherInc_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Other Income</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_otherInc">—</td></tr>
+                    <tr style="border-top:1px solid var(--tt-border);"><td style="padding:7px 0;font-weight:700;font-family:'Syne',sans-serif;">TOTAL INCOME (A)</td><td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700;color:var(--tt-green);" id="ias_totalInc">—</td></tr>
+                    <tr><td style="padding:12px 0 6px;font-weight:700;font-family:'Syne',sans-serif;font-size:11px;text-transform:uppercase;color:var(--tt-red);">EXPENDITURE</td><td></td></tr>
+                    <tr id="ias_advance_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Advance Payments to Vendors</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_advance">—</td></tr>
+                    <tr><td style="padding:5px 16px;color:var(--tt-ink2);">Daily / Running Expenses</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_daily">—</td></tr>
+                    <tr id="ias_salary_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Staff Salaries &amp; Remuneration</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_salary">—</td></tr>
+                    <tr id="ias_transport_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Transport Costs</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_transport">—</td></tr>
+                    <tr id="ias_utility_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Utility / Overhead</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_utility">—</td></tr>
+                    <tr id="ias_otherExp_row" style="display:none;"><td style="padding:5px 16px;color:var(--tt-ink2);">Other Expenditure</td><td style="text-align:right;font-family:'DM Mono',monospace;" id="ias_otherExp">—</td></tr>
+                    <tr style="border-top:1px solid var(--tt-border);"><td style="padding:7px 0;font-weight:700;font-family:'Syne',sans-serif;">TOTAL EXPENDITURE (B)</td><td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700;color:var(--tt-red);" id="ias_totalExp">—</td></tr>
+                    <tr style="border-top:2px solid var(--tt-ink);"><td style="padding:10px 0;font-weight:700;font-family:'Syne',sans-serif;font-size:13px;">SURPLUS / (DEFICIT) (A − B)</td><td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700;font-size:14px;" id="ias_surplus">—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1215,13 +1415,14 @@ function resetData(){if(!confirm('Reset all balance sheet data to original seed 
 /* ════════════════════════════════════════════════════════
    TACKTRAN DATA & LOGIC
 ════════════════════════════════════════════════════════ */
-let DB = { entities:[], transactions:[], txCounter:1000, expenses:[], expCounter:0, supplies:[], supCounter:0 };
+let DB = { entities:[], transactions:[], txCounter:1000, expenses:[], expCounter:0, supplies:[], supCounter:0, fgvBank:[], bankCounter:0 };
 
 function getTxMeta(type){
   const map={
     vendor_advance: {label:'Vendor Advance',party:'vendor',balDelta:-1,useItems:false,debit:true,creditEffect:'Payment to vendor (negative balance)'},
     vendor_delivery:{label:'Goods by Vendor',party:'vendor',balDelta:+1,useItems:true,debit:false,creditEffect:'Goods received reduce vendor debt'},
     vendor_refund:  {label:'Money Refund',party:'vendor',balDelta:+1,useItems:false,debit:false,creditEffect:'Refund from vendor reduces their balance (you get money back)'},
+    vendor_balance_goods:{label:'Balance for Goods',party:'vendor',balDelta:-1,useItems:false,debit:true,autoDeduct:true,creditEffect:'Balance for goods — auto-deducted from vendor account balance'},
     company_supply: {label:'Supply to Company',party:'company',balDelta:+1,useItems:true,debit:true,creditEffect:'Company owes you for goods'},
     company_payment:{label:'Payment from Company',party:'company',balDelta:-1,useItems:false,debit:false,creditEffect:'Company payment reduces their debt'},
   };
@@ -1236,6 +1437,8 @@ function ttInit(){
   if(document.getElementById('supDate'))document.getElementById('supDate').value=todayStr;
   if(!DB.supplies)DB.supplies=[];
   if(!DB.supCounter)DB.supCounter=0;
+  if(!DB.fgvBank)DB.fgvBank=[];
+  if(!DB.bankCounter)DB.bankCounter=0;
   document.getElementById('txRefPreview').textContent='Ref: FGV-'+String(DB.txCounter+1).padStart(4,'0');
   document.getElementById('expRefPreview').textContent='Ref: EXP-'+String(DB.expCounter+1).padStart(4,'0');
   if(DB.entities.length===0)seedDemo();
@@ -1253,6 +1456,7 @@ function loadDB(){
   if(!DB.entities)DB.entities=[];if(!DB.transactions)DB.transactions=[];
   if(!DB.txCounter)DB.txCounter=1000;if(!DB.expenses)DB.expenses=[];
   if(!DB.expCounter)DB.expCounter=0;if(!DB.supplies)DB.supplies=[];if(!DB.supCounter)DB.supCounter=0;
+  if(!DB.fgvBank)DB.fgvBank=[];if(!DB.bankCounter)DB.bankCounter=0;
 }
 
 function ttShowTab(el,id){
@@ -1265,6 +1469,8 @@ function ttShowTab(el,id){
   if(id==='accounts')renderAccounts();
   if(id==='expenses'){populateExpVendorDropdown();renderExpenses();renderExpSummary();}
   if(id==='supply'){renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();if(!supLineItems.length)addSupplyLine();}
+  if(id==='fgvbank'){initBankDates();renderBankTab();}
+  if(id==='incexp'){renderIncExpTab();}
   if(id==='manage')renderManage();
 }
 function ttRenderAll(){renderDashboard();renderManage();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();}
@@ -1276,14 +1482,46 @@ function onTxTypeChange(){
   const sel=document.getElementById('txAccount');sel.innerHTML='<option value="">— Select Account —</option>';
   (party?DB.entities.filter(e=>e.type===party):DB.entities).forEach(e=>{sel.innerHTML+=`<option value="${e.id}">${e.name} [Bal: ₦${ttFmt(e.balance)}]</option>`;});
   document.getElementById('itemsSection').style.display=(meta&&meta.useItems)?'block':'none';
-  document.getElementById('directSection').style.display=(meta&&!meta.useItems)?'block':'none';
+  document.getElementById('directSection').style.display=(meta&&!meta.useItems&&!meta.autoDeduct)?'block':'none';
+  // Show autoDeduct section for balance_goods
+  let autoSec=document.getElementById('autoDeductSection');
+  if(meta&&meta.autoDeduct){
+    if(!autoSec){
+      autoSec=document.createElement('div');autoSec.id='autoDeductSection';
+      autoSec.innerHTML=`<div class="tt-section-divider">Balance for Goods — Auto Deduct</div>
+        <div class="tt-form-row">
+          <div class="tt-fg"><label>Vendor Current Balance (₦)</label><input type="text" id="autoVendorBal" readonly></div>
+          <div class="tt-fg"><label>Amount to Deduct (₦) <span style="font-size:9px;color:var(--tt-ink3);">auto-filled from balance</span></label><input type="number" id="autoDeductAmt" min="0" step="0.01" placeholder="0.00" oninput="recalcDirect()"></div>
+          <div class="tt-fg"><label>Narration</label><input type="text" id="autoDeductNarr" placeholder="e.g. Balance for Jan delivery…"></div>
+        </div>`;
+      document.getElementById('directSection').parentNode.insertBefore(autoSec, document.getElementById('directSection'));
+    }
+    autoSec.style.display='block';
+  } else {
+    if(autoSec)autoSec.style.display='none';
+  }
   document.getElementById('totalsRow').style.display=meta?'block':'none';
   document.getElementById('attachSection').style.display=meta?'block':'none';
   document.getElementById('effectRow').style.display=meta?'block':'none';
   if(meta){document.getElementById('effectBox').innerHTML=`<b>${meta.label}:</b> ${meta.creditEffect}`;recalcAll();}
   clearItemRows();currentFile=null;resetAttachZone();updateNewBalance();
 }
-function onAccountChange(){updateNewBalance();}
+function onAccountChange(){
+  const type=document.getElementById('txType').value,meta=getTxMeta(type);
+  const entityId=document.getElementById('txAccount').value;
+  if(meta&&meta.autoDeduct&&entityId){
+    const entity=DB.entities.find(e=>e.id===entityId);
+    if(entity){
+      const bal=entity.balance;
+      const autoBalEl=document.getElementById('autoVendorBal');
+      const autoAmtEl=document.getElementById('autoDeductAmt');
+      if(autoBalEl)autoBalEl.value=(bal<0?'−':'')+'₦'+ttFmt(Math.abs(bal));
+      // Pre-fill deduct amount with absolute balance (vendor owes/you owe)
+      if(autoAmtEl&&!autoAmtEl.value)autoAmtEl.value=Math.abs(bal).toFixed(2);
+    }
+  }
+  updateNewBalance();
+}
 function updateNewBalance(){
   const entityId=document.getElementById('txAccount').value,type=document.getElementById('txType').value,meta=getTxMeta(type);
   if(!entityId||!meta){document.getElementById('currentBalPreview').innerHTML='';return;}
@@ -1298,6 +1536,7 @@ function balClass(entity,bal){if(entity.type==='vendor')return bal<0?'red':'gree
 function getCurrentAmt(){
   const type=document.getElementById('txType').value,meta=getTxMeta(type);if(!meta)return 0;
   if(meta.useItems){let total=0;document.querySelectorAll('#itemsBody tr').forEach(tr=>{const id=tr.dataset.id,qty=parseFloat(document.getElementById('qty-'+id)?.value)||0,price=parseFloat(document.getElementById('price-'+id)?.value)||0;total+=qty*price;});return total;}
+  if(meta.autoDeduct){return parseFloat(document.getElementById('autoDeductAmt')?.value)||0;}
   return parseFloat(document.getElementById('directAmt')?.value)||0;
 }
 function recalcAll(){const amt=getCurrentAmt();document.getElementById('calcTotal').value='₦'+ttFmt(amt);updateNewBalance();}
@@ -1325,15 +1564,62 @@ function submitTx(){
   const date=document.getElementById('txDate').value,type=document.getElementById('txType').value,entityId=document.getElementById('txAccount').value;
   if(!date){ttToast('⚠ Please select a date.');return;}if(!type){ttToast('⚠ Please select a type.');return;}if(!entityId){ttToast('⚠ Please select an account.');return;}
   const meta=getTxMeta(type);let amount=0,narration='',items=[];
-  if(meta.useItems){const rows=document.querySelectorAll('#itemsBody tr');if(!rows.length){ttToast('⚠ Add at least one item.');return;}rows.forEach(tr=>{const id=tr.dataset.id,desc=document.getElementById('desc-'+id)?.value||'',qty=parseFloat(document.getElementById('qty-'+id)?.value)||0,unit=document.getElementById('unit-'+id)?.value||'',price=parseFloat(document.getElementById('price-'+id)?.value)||0,amt=qty*price;items.push({desc,qty,unit,price,amt});amount+=amt;});if(amount<=0){ttToast('⚠ Total must be > zero.');return;}narration=items.map(i=>`${i.desc} — ${i.qty} ${i.unit} × ₦${ttFmt(i.price)} = ₦${ttFmt(i.amt)}`).join('\n');}else{amount=parseFloat(document.getElementById('directAmt')?.value)||0;narration=document.getElementById('directNarr')?.value||meta.label;if(amount<=0){ttToast('⚠ Please enter a valid amount.');return;}}
+  if(meta.useItems){const rows=document.querySelectorAll('#itemsBody tr');if(!rows.length){ttToast('⚠ Add at least one item.');return;}rows.forEach(tr=>{const id=tr.dataset.id,desc=document.getElementById('desc-'+id)?.value||'',qty=parseFloat(document.getElementById('qty-'+id)?.value)||0,unit=document.getElementById('unit-'+id)?.value||'',price=parseFloat(document.getElementById('price-'+id)?.value)||0,amt=qty*price;items.push({desc,qty,unit,price,amt});amount+=amt;});if(amount<=0){ttToast('⚠ Total must be > zero.');return;}narration=items.map(i=>`${i.desc} — ${i.qty} ${i.unit} × ₦${ttFmt(i.price)} = ₦${ttFmt(i.amt)}`).join('\n');}else if(meta.autoDeduct){amount=parseFloat(document.getElementById('autoDeductAmt')?.value)||0;narration=document.getElementById('autoDeductNarr')?.value||'Balance for Goods (Auto-Deducted)';if(amount<=0){ttToast('⚠ Please enter a deduction amount.');return;}}else{amount=parseFloat(document.getElementById('directAmt')?.value)||0;narration=document.getElementById('directNarr')?.value||meta.label;if(amount<=0){ttToast('⚠ Please enter a valid amount.');return;}}
   const entity=DB.entities.find(e=>e.id===entityId);const balBefore=entity.balance;entity.balance+=meta.balDelta*amount;const balAfter=entity.balance;
   DB.txCounter++;const tx={id:'tx'+Date.now(),ref:'FGV-'+String(DB.txCounter).padStart(4,'0'),date,type,entityId,items,amount,narration,balBefore,balAfter,sign:meta.balDelta,attachment:currentFile?{name:currentFile.name,dataUrl:currentFile.dataUrl,fileType:currentFile.type}:null};
-  DB.transactions.unshift(tx);saveDB();ttRenderAll();clearForm();document.getElementById('txRefPreview').textContent='Ref: FGV-'+String(DB.txCounter+1).padStart(4,'0');ttToast(`✓ ${tx.ref} posted — ${entity.name} — ₦${ttFmt(amount)}`);
+  DB.transactions.unshift(tx);
+
+  /* ── AUTO-POST TO FGV BANK ──────────────────────────────────────────
+     Cash-flow rules:
+       company_payment  → CREDIT  (money received from company = income)
+       vendor_refund    → CREDIT  (money back from vendor = income)
+       vendor_advance   → DEBIT   (cash paid out to vendor = expenditure)
+       vendor_balance_goods → DEBIT (cash paid out as balance = expenditure)
+       vendor_delivery  → NO BANK ENTRY (goods received, not cash)
+       company_supply   → NO BANK ENTRY (goods sent out, not cash yet)
+  ─────────────────────────────────────────────────────────────────── */
+  (function autoPostBank(){
+    var bankSide=null,bankIncType=null,bankExpType=null,bankNarration=narration,bankSource='',bankPayee='';
+    if(type==='company_payment'){
+      bankSide='credit';bankIncType='company_payment';bankSource=entity.name;
+      bankNarration=narration||('Payment received from '+entity.name);
+    } else if(type==='vendor_refund'){
+      bankSide='credit';bankIncType='vendor_refund';bankSource=entity.name;
+      bankNarration=narration||('Refund from vendor '+entity.name);
+    } else if(type==='vendor_advance'){
+      bankSide='debit';bankExpType='advance_payment';bankPayee=entity.name;
+      bankNarration=narration||('Advance payment to '+entity.name);
+    } else if(type==='vendor_balance_goods'){
+      bankSide='debit';bankExpType='advance_payment';bankPayee=entity.name;
+      bankNarration=narration||('Balance for goods — '+entity.name);
+    }
+    if(!bankSide)return; // non-cash transaction — no bank entry
+    DB.bankCounter++;
+    var incTypeLabel=bankSide==='credit'?({company_payment:'Company Payment',vendor_refund:'Vendor Refund',other_income:'Other Income'}[bankIncType]||bankIncType):'';
+    var expTypeLabel=bankSide==='debit'?({advance_payment:'Advance Payment',daily_expense:'Daily Expense',salary:'Salary',transport:'Transport',utility:'Utility',other_expense:'Other Expense'}[bankExpType]||bankExpType):'';
+    var bankEntry={
+      id:'bnk'+Date.now()+'_tx',
+      ref:'BNK-'+String(DB.bankCounter).padStart(4,'0'),
+      date:date,side:bankSide,
+      amount:amount,narration:bankNarration,
+      source:bankSource,payee:bankPayee,
+      incType:bankIncType,incTypeLabel:incTypeLabel,
+      expType:bankExpType,expTypeLabel:expTypeLabel,
+      linkedRef:tx.ref
+    };
+    DB.fgvBank.unshift(bankEntry);
+  })();
+
+  saveDB();ttRenderAll();clearForm();document.getElementById('txRefPreview').textContent='Ref: FGV-'+String(DB.txCounter+1).padStart(4,'0');ttToast(`✓ ${tx.ref} posted — ${entity.name} — ₦${ttFmt(amount)} (auto-posted to FGV Bank)`);
 }
 function clearForm(){
   document.getElementById('txType').value='';document.getElementById('txAccount').innerHTML='<option value="">— Select Account —</option>';
   ['itemsSection','directSection','totalsRow','attachSection','effectRow'].forEach(id=>document.getElementById(id).style.display='none');
+  const ads=document.getElementById('autoDeductSection');if(ads)ads.style.display='none';
   document.getElementById('directAmt').value='';document.getElementById('directNarr').value='';document.getElementById('calcTotal').value='';document.getElementById('newBalance').value='';document.getElementById('currentBalPreview').innerHTML='';
+  const adAmt=document.getElementById('autoDeductAmt');if(adAmt)adAmt.value='';
+  const adNarr=document.getElementById('autoDeductNarr');if(adNarr)adNarr.value='';
+  const adBal=document.getElementById('autoVendorBal');if(adBal)adBal.value='';
   clearItemRows();currentFile=null;resetAttachZone();
 }
 
@@ -1341,7 +1627,7 @@ function renderDashboard(){
   const vendors=DB.entities.filter(e=>e.type==='vendor'),companies=DB.entities.filter(e=>e.type==='company'),todayStr=ttToday();
   const vendorTotal=vendors.reduce((s,e)=>s+e.balance,0),companyTotal=companies.reduce((s,e)=>s+e.balance,0),txToday=DB.transactions.filter(t=>t.date===todayStr).length;
   const totalAdvances=DB.transactions.filter(t=>t.type==='vendor_advance').reduce((s,t)=>s+t.amount,0),totalDeliveries=DB.transactions.filter(t=>t.type==='vendor_delivery').reduce((s,t)=>s+t.amount,0);
-  document.getElementById('statGrid').innerHTML=`<div class="tt-stat-card gold"><div class="tt-stat-label">Vendor Balance (Net)</div><div class="tt-stat-val ${vendorTotal<0?'neg':'green'}">₦${ttFmt(Math.abs(vendorTotal))}</div><div class="tt-stat-sub">${vendorTotal<0?'Advances outstanding':'Goods exceed advances'}</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">Company Receivables</div><div class="tt-stat-val ${companyTotal>0?'blue':'green'}">₦${ttFmt(Math.abs(companyTotal))}</div><div class="tt-stat-sub">${companyTotal>0?'Companies owe you':companyTotal<0?'Overpaid':'Settled'}</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Advances Paid</div><div class="tt-stat-val red">₦${ttFmt(totalAdvances)}</div><div class="tt-stat-sub">To vendors</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Goods Delivered</div><div class="tt-stat-val green">₦${ttFmt(totalDeliveries)}</div><div class="tt-stat-sub">Value from vendors</div></div><div class="tt-stat-card gold"><div class="tt-stat-label">Today's Transactions</div><div class="tt-stat-val gold">${txToday}</div><div class="tt-stat-sub">${DB.transactions.length} total</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Today's Expenses</div><div class="tt-stat-val red">₦${ttFmt(DB.expenses.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.amount,0))}</div><div class="tt-stat-sub">${DB.expenses.filter(e=>e.date===todayStr).length} entries today</div></div>`;
+  document.getElementById('statGrid').innerHTML=`<div class="tt-stat-card gold"><div class="tt-stat-label">Vendor Balance (Net)</div><div class="tt-stat-val ${vendorTotal<0?'neg':'green'}">₦${ttFmt(Math.abs(vendorTotal))}</div><div class="tt-stat-sub">${vendorTotal<0?'Advances outstanding':'Goods exceed advances'}</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">Company Receivables</div><div class="tt-stat-val ${companyTotal>0?'blue':'green'}">₦${ttFmt(Math.abs(companyTotal))}</div><div class="tt-stat-sub">${companyTotal>0?'Companies owe you':companyTotal<0?'Overpaid':'Settled'}</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Advances Paid</div><div class="tt-stat-val red">₦${ttFmt(totalAdvances)}</div><div class="tt-stat-sub">To vendors</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Goods Delivered</div><div class="tt-stat-val green">₦${ttFmt(totalDeliveries)}</div><div class="tt-stat-sub">Value from vendors</div></div><div class="tt-stat-card gold"><div class="tt-stat-label">Today's Transactions</div><div class="tt-stat-val gold">${txToday}</div><div class="tt-stat-sub">${DB.transactions.length} total</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Today's Expenses</div><div class="tt-stat-val red">₦${ttFmt(DB.expenses.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.amount,0))}</div><div class="tt-stat-sub">${DB.expenses.filter(e=>e.date===todayStr).length} entries today</div></div><div class="tt-stat-card green"><div class="tt-stat-label">🏦 FGV Bank Balance</div><div class="tt-stat-val ${getBankBalance()<0?'neg':'green'}">₦${ttFmt(Math.abs(getBankBalance()))}</div><div class="tt-stat-sub">${getBankBalance()<0?'Overdraft':'Available funds'}</div></div>`;
   const recent=DB.transactions.slice(0,10);
   if(!recent.length){document.getElementById('dashRecent').innerHTML='<div class="tt-empty"><div class="tt-empty-icon">📋</div>No transactions yet.</div>';}
   else{let h='<table class="tt-ledger-tbl"><thead><tr><th>Date</th><th>Ref</th><th>Account</th><th>Type</th><th>Amount</th><th>Balance</th></tr></thead><tbody>';recent.forEach(tx=>{const e=DB.entities.find(x=>x.id===tx.entityId),meta=getTxMeta(tx.type);h+=`<tr><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3)">${tx.date}</td><td class="tt-mono" style="font-size:11px;">${tx.ref}</td><td style="font-size:12px;">${e?.name||'?'}</td><td><span class="tt-badge ${e?.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${meta?.label||''}</span></td><td class="tt-mono" style="font-size:12px;color:${tx.sign>0?'var(--tt-blue)':'var(--tt-green)'}">₦${ttFmt(tx.amount)}</td><td class="tt-mono" style="font-size:12px;color:${tx.balAfter<0?'var(--tt-red)':'var(--tt-green)'}">₦${ttFmt(tx.balAfter)}</td></tr>`;});h+='</tbody></table>';document.getElementById('dashRecent').innerHTML=h;}
@@ -1392,7 +1678,7 @@ function removeEntity(id){const cnt=DB.transactions.filter(t=>t.entityId===id).l
 let pendingDel=null;
 function openDel(id){pendingDel=id;const tx=DB.transactions.find(t=>t.id===id),e=DB.entities.find(x=>x.id===tx?.entityId),meta=getTxMeta(tx?.type);document.getElementById('delPreview').innerHTML=`<b>Ref:</b> ${tx?.ref} &nbsp;&nbsp; <b>Date:</b> ${tx?.date}<br><b>Account:</b> ${e?.name||'?'}<br><b>Type:</b> ${meta?.label||tx?.type}<br><b>Amount:</b> ₦${ttFmt(tx?.amount)}<br><b>Balance reversal:</b> ₦${ttFmt(e?.balance)} → ₦${ttFmt((e?.balance||0)-(meta?.balDelta||0)*(tx?.amount||0))}`;document.getElementById('delModal').style.display='flex';}
 function closeDel(){document.getElementById('delModal').style.display='none';pendingDel=null;}
-function confirmDel(){const tx=DB.transactions.find(t=>t.id===pendingDel);if(tx){const meta=getTxMeta(tx.type),e=DB.entities.find(x=>x.id===tx.entityId);if(e)e.balance-=meta.balDelta*tx.amount;DB.transactions=DB.transactions.filter(t=>t.id!==pendingDel);saveDB();ttRenderAll();if(document.getElementById('tt-tab-ledger').classList.contains('active')){populateLedgerFilter();renderLedger();}ttToast('Transaction deleted. Balance reversed.');}closeDel();}
+function confirmDel(){const tx=DB.transactions.find(t=>t.id===pendingDel);if(tx){const meta=getTxMeta(tx.type),e=DB.entities.find(x=>x.id===tx.entityId);if(e)e.balance-=meta.balDelta*tx.amount;/* also remove linked bank entry */DB.fgvBank=(DB.fgvBank||[]).filter(b=>b.linkedRef!==tx.ref);DB.transactions=DB.transactions.filter(t=>t.id!==pendingDel);saveDB();ttRenderAll();if(document.getElementById('tt-tab-ledger').classList.contains('active')){populateLedgerFilter();renderLedger();}ttToast('Transaction deleted. Balance & bank entry reversed.');}closeDel();}
 
 function openViewTx(id){
   const tx=DB.transactions.find(t=>t.id===id);if(!tx)return;
@@ -1478,19 +1764,37 @@ function processExpFile(file){if(!file)return;const reader=new FileReader();read
 function resetExpAttachZone(){document.getElementById('expAttachZone').classList.remove('has-file');document.getElementById('expAttachPreview').innerHTML='';document.getElementById('expFileInput').value='';}
 function populateExpVendorDropdown(){const sel=document.getElementById('expVendor');if(!sel)return;const cur=sel.value;sel.innerHTML='<option value="">— None —</option>';const vendors=DB.entities.filter(e=>e.type==='vendor'),companies=DB.entities.filter(e=>e.type==='company');if(vendors.length){const grp=document.createElement('optgroup');grp.label='VENDORS';vendors.forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.name+' [Bal: ₦'+ttFmt(e.balance)+']';grp.appendChild(o);});sel.appendChild(grp);}if(companies.length){const grp=document.createElement('optgroup');grp.label='COMPANIES';companies.forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.name+' [Bal: ₦'+ttFmt(e.balance)+']';grp.appendChild(o);});sel.appendChild(grp);}if(cur)sel.value=cur;}
 function submitExpense(){
-  const date=document.getElementById('expDate').value,category=document.getElementById('expCategory').value,amount=parseFloat(document.getElementById('expAmount').value)||0,desc=document.getElementById('expDesc').value.trim(),paidBy=document.getElementById('expPaidBy').value,vendorId=document.getElementById('expVendor')?.value||'';
+  const date=document.getElementById('expDate').value,category=document.getElementById('expCategory').value,amount=parseFloat(document.getElementById('expAmount').value)||0,desc=document.getElementById('expDesc').value.trim(),paidBy=document.getElementById('expPaidBy').value;
   if(!date){ttToast('⚠ Please select a date.');return;}if(amount<=0){ttToast('⚠ Please enter a valid amount.');return;}if(!desc){ttToast('⚠ Please add a description.');return;}
-  DB.expCounter++;const exp={id:'exp'+Date.now(),ref:'EXP-'+String(DB.expCounter).padStart(4,'0'),date,category,amount,desc,paidBy,vendorId:vendorId||null,attachment:currentExpFile?{name:currentExpFile.name,dataUrl:currentExpFile.dataUrl,fileType:currentExpFile.type}:null};
-  /* If a vendor/company is attached, add the expense amount to their balance */
-  if(vendorId){const entity=DB.entities.find(e=>e.id===vendorId);if(entity){entity.balance+=amount;}}
-  DB.expenses.unshift(exp);saveDB();renderExpenses();renderExpSummary();renderDashboard();clearExpForm();document.getElementById('expRefPreview').textContent='Ref: EXP-'+String(DB.expCounter+1).padStart(4,'0');ttToast(`✓ ${exp.ref} saved — ${category} — ₦${ttFmt(amount)}`);
+  DB.expCounter++;const exp={id:'exp'+Date.now(),ref:'EXP-'+String(DB.expCounter).padStart(4,'0'),date,category,amount,desc,paidBy,vendorId:null,attachment:currentExpFile?{name:currentExpFile.name,dataUrl:currentExpFile.dataUrl,fileType:currentExpFile.type}:null};
+  DB.expenses.unshift(exp);
+
+  /* ── AUTO-POST DAILY EXPENSE TO FGV BANK AS DEBIT ─────────────── */
+  (function autoPostExpBank(){
+    DB.bankCounter++;
+    var bankEntry={
+      id:'bnk'+Date.now()+'_exp',
+      ref:'BNK-'+String(DB.bankCounter).padStart(4,'0'),
+      date:date,side:'debit',
+      amount:amount,
+      narration:desc||category,
+      source:'',payee:paidBy||'Cash',
+      incType:null,incTypeLabel:'',
+      expType:'daily_expense',expTypeLabel:'Daily Expense',
+      linkedRef:exp.ref,
+      expCategory:category
+    };
+    DB.fgvBank.unshift(bankEntry);
+  })();
+
+  saveDB();renderExpenses();renderExpSummary();renderDashboard();renderIncExpTab();clearExpForm();document.getElementById('expRefPreview').textContent='Ref: EXP-'+String(DB.expCounter+1).padStart(4,'0');ttToast(`✓ ${exp.ref} saved — ${category} — ₦${ttFmt(amount)} (posted to FGV Bank)`);
 }
-function clearExpForm(){document.getElementById('expAmount').value='';document.getElementById('expDesc').value='';document.getElementById('expPaidBy').value='Cash';document.getElementById('expCategory').value='Fuel';if(document.getElementById('expVendor'))document.getElementById('expVendor').value='';document.getElementById('expTodayTotal').value='';document.getElementById('expMonthTotal').value='';currentExpFile=null;resetExpAttachZone();updateExpTotal();}
+function clearExpForm(){document.getElementById('expAmount').value='';document.getElementById('expDesc').value='';document.getElementById('expPaidBy').value='Cash';document.getElementById('expCategory').value='Fuel';document.getElementById('expTodayTotal').value='';document.getElementById('expMonthTotal').value='';currentExpFile=null;resetExpAttachZone();updateExpTotal();}
 function renderExpenses(){
   const efCat=document.getElementById('efCategory')?.value||'',efFrom=document.getElementById('efFrom')?.value||'',efTo=document.getElementById('efTo')?.value||'';
   let exps=[...DB.expenses];if(efCat)exps=exps.filter(e=>e.category===efCat);if(efFrom)exps=exps.filter(e=>e.date>=efFrom);if(efTo)exps=exps.filter(e=>e.date<=efTo);
   document.getElementById('expLedgerEmpty').style.display=exps.length?'none':'block';if(!exps.length){document.getElementById('expLedgerBody').innerHTML='';return;}
-  let h='';exps.forEach(exp=>{const attachBtn=exp.attachment?`<span class="tt-attach-link" onclick='viewExpAttach("${exp.id}")'>📎 ${exp.attachment.name}</span>`:'—';const vendorEnt=exp.vendorId?DB.entities.find(e=>e.id===exp.vendorId):null;const vendorCell=vendorEnt?`<span class="tt-badge ${vendorEnt.type==='vendor'?'tt-badge-vendor':'tt-badge-company'}">${vendorEnt.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${exp.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${exp.ref}</td><td><span class="tt-cat-pill">${exp.category}</span></td><td style="font-size:12px;color:var(--tt-ink2);">${exp.desc}</td><td style="font-size:11px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">${exp.paidBy}</td><td style="font-size:11px;">${vendorCell}</td><td class="tt-amt-debit">₦${ttFmt(exp.amount)}</td><td>${attachBtn}</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteExpense('${exp.id}')">✕</button></td></tr>`;});
+  let h='';exps.forEach(exp=>{const attachBtn=exp.attachment?`<span class="tt-attach-link" onclick='viewExpAttach("${exp.id}")'>📎 ${exp.attachment.name}</span>`:'—';h+=`<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">${exp.date}</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">${exp.ref}</td><td><span class="tt-cat-pill">${exp.category}</span></td><td style="font-size:12px;color:var(--tt-ink2);">${exp.desc}</td><td style="font-size:11px;color:var(--tt-ink3);font-family:'DM Mono',monospace;">${exp.paidBy}</td><td class="tt-amt-debit">₦${ttFmt(exp.amount)}</td><td>${attachBtn}</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteExpense('${exp.id}')">✕</button></td></tr>`;});
   document.getElementById('expLedgerBody').innerHTML=h;
 }
 function renderExpSummary(){
@@ -1501,7 +1805,7 @@ function renderExpSummary(){
   const cats={};allExps.forEach(e=>{cats[e.category]=(cats[e.category]||0)+e.amount;});const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);const catEl=document.getElementById('expCatBreakdown');if(!sorted.length){catEl.innerHTML='';return;}
   catEl.innerHTML='<div style="display:flex;flex-direction:column;gap:7px;">'+sorted.map(([cat,amt])=>{const pct=allTotal?Math.round(amt/allTotal*100):0;return`<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;"><span style="font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--tt-ink)">${cat}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--tt-red);">₦${ttFmt(amt)} <span style="color:var(--tt-ink3);font-size:10px;">(${pct}%)</span></span></div><div style="height:5px;background:var(--tt-surface3);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--tt-red);border-radius:3px;transition:width 0.4s;"></div></div></div>`;}).join('')+'</div>';
 }
-function deleteExpense(id){if(!confirm('Delete this expense?'))return;const exp=DB.expenses.find(e=>e.id===id);if(exp&&exp.vendorId){const entity=DB.entities.find(e=>e.id===exp.vendorId);if(entity)entity.balance-=exp.amount;}DB.expenses=DB.expenses.filter(e=>e.id!==id);saveDB();renderExpenses();renderExpSummary();renderDashboard();ttToast('Expense deleted.');}
+function deleteExpense(id){if(!confirm('Delete this expense?'))return;const exp=DB.expenses.find(e=>e.id===id);/* also remove linked bank entry */if(exp){DB.fgvBank=(DB.fgvBank||[]).filter(b=>b.linkedRef!==exp.ref);}DB.expenses=DB.expenses.filter(e=>e.id!==id);saveDB();renderExpenses();renderExpSummary();renderDashboard();ttToast('Expense deleted — FGV Bank entry reversed.');}
 function viewExpAttach(expId){const exp=DB.expenses.find(e=>e.id===expId);if(!exp?.attachment)return;const att=exp.attachment;document.getElementById('attachModalTitle').textContent=att.name;let body='';if(att.fileType?.startsWith('image/')){body=`<img src="${att.dataUrl}" style="max-width:100%;max-height:70vh;border-radius:6px;">`;}else{body=`<iframe src="${att.dataUrl}" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>`;}body+=`<div style="margin-top:11px;"><a href="${att.dataUrl}" download="${att.name}" class="tt-btn tt-btn-ghost tt-btn-sm">⬇ Download</a></div>`;document.getElementById('attachModalBody').innerHTML=body;document.getElementById('viewAttachModal').style.display='flex';}
 function clearExpFilters(){['efCategory','efFrom','efTo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderExpenses();}
 function exportExpCSV(){const rows=[['Date','Ref','Category','Description','Paid By','Amount (₦)','Attachment']];DB.expenses.forEach(exp=>{rows.push([exp.date,exp.ref,exp.category,'"'+(exp.desc||'').replace(/"/g,'""')+'"',exp.paidBy,exp.amount,exp.attachment?exp.attachment.name:'']);});const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='FGV_EXPENSES_'+ttToday()+'.csv';a.click();}
@@ -1514,7 +1818,7 @@ var SUP_UNITS=['kg','litres','bags','tonnes','crates','pieces','cartons','units'
 
 /* ── Additional Costs (transport, loading, etc.) ── */
 var supAddlCosts=[],supAddlCounter=0;
-var ADDL_COST_TYPES=['Transport / Haulage','Loading / Offloading','Storage / Warehousing','Customs / Clearance','Insurance','Packaging','Fumigation','Weighbridge Fee','Agency Fee','Bank Charges','Other Expenses'];
+var ADDL_COST_TYPES=['Transport Cost','Other Expenses','Transport / Haulage','Loading / Offloading','Storage / Warehousing','Customs / Clearance','Insurance','Packaging','Fumigation','Weighbridge Fee','Agency Fee','Bank Charges'];
 
 function addAdditionalCostRow(data){
   supAddlCounter++;var id='acr'+supAddlCounter;supAddlCosts.push({id:id});
@@ -1580,7 +1884,9 @@ function calcSupplyTotals(){
   var totalRev=0,totalBaseCost=0;
   supLineItems.forEach(function(li){var row=getLineRow(li.id);if(!row)return;var qty=parseFloat(row.querySelector('[data-field=qty]').value)||0,saleP=parseFloat(row.querySelector('[data-field=salePrice]').value)||0,costP=parseFloat(row.querySelector('[data-field=costPrice]').value)||0;totalRev+=qty*saleP;totalBaseCost+=qty*costP;});
   var addlTotal=getAdditionalCostsTotal();
-  var totalCost=totalBaseCost+addlTotal;
+  var transportCost=parseFloat(document.getElementById('supTransportCost')?.value)||0;
+  var otherExpenses=parseFloat(document.getElementById('supOtherExpenses')?.value)||0;
+  var totalCost=totalBaseCost+addlTotal+transportCost+otherExpenses;
   var profit=totalRev-totalCost;
   document.getElementById('supTotalRevenue').value='₦'+ttFmt(totalRev);
   document.getElementById('supTotalCost').value='₦'+ttFmt(totalCost);
@@ -1595,9 +1901,11 @@ function submitSupply(){
   var lines=getSupplyLines(),validLines=lines.filter(function(l){return l.product&&l.qty>0&&l.salePrice>0;});if(!validLines.length){ttToast('⚠ Add at least one valid line item.');return;}
   var addlCosts=getAdditionalCostsList();
   var addlTotal=addlCosts.reduce(function(s,c){return s+c.amount;},0);
+  var transportCost=parseFloat(document.getElementById('supTransportCost')?.value)||0;
+  var otherExpenses=parseFloat(document.getElementById('supOtherExpenses')?.value)||0;
   var totalRev=validLines.reduce(function(s,l){return s+l.revenue;},0);
   var totalBaseCost=validLines.reduce(function(s,l){return s+l.cost;},0);
-  var totalCost=totalBaseCost+addlTotal;
+  var totalCost=totalBaseCost+addlTotal+transportCost+otherExpenses;
   var totalProfit=totalRev-totalCost;
   DB.supCounter=(DB.supCounter||0)+1;var ref='SUP-'+String(DB.supCounter).padStart(4,'0');if(!DB.supplies)DB.supplies=[];
   DB.supplies.unshift({
@@ -1607,13 +1915,17 @@ function submitSupply(){
     qty:validLines[0].qty,unit:validLines[0].unit,
     salePrice:validLines[0].salePrice,costPrice:validLines[0].costPrice,
     additionalCosts:addlCosts,additionalTotal:addlTotal,
+    transportCost:transportCost,otherExpenses:otherExpenses,
     revenue:totalRev,cost:totalCost,profit:totalProfit,narr:narr
   });
-  saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();renderDashboard();clearSupplyForm();
-  ttToast('✓ Supply posted: '+ref+' ('+validLines.length+' line'+(validLines.length>1?'s':'')+(addlCosts.length?' · '+addlCosts.length+' addl cost'+(addlCosts.length>1?'s':''):'')+')');
+  saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();updateSupplyRefPreview();renderDashboard();renderIncExpTab();clearSupplyForm();
+  var extraNote=(transportCost>0||otherExpenses>0)?' · Transport: ₦'+ttFmt(transportCost)+' · Other: ₦'+ttFmt(otherExpenses):'';
+  ttToast('✓ Supply posted: '+ref+' ('+validLines.length+' line'+(validLines.length>1?'s':'')+(addlCosts.length?' · '+addlCosts.length+' addl cost'+(addlCosts.length>1?'s':''):'')+extraNote+')');
 }
 function clearSupplyForm(){
   document.getElementById('supCustomer').value='';document.getElementById('supNarr').value='';document.getElementById('supDate').value=ttToday();
+  var tc=document.getElementById('supTransportCost');if(tc)tc.value='';
+  var oe=document.getElementById('supOtherExpenses');if(oe)oe.value='';
   supLineItems=[];supLineCounter=0;document.getElementById('supItemsBody').innerHTML='';addSupplyLine();
   /* reset additional costs */
   supAddlCosts=[];supAddlCounter=0;
@@ -1627,12 +1939,192 @@ function clearSupplyForm(){
 }
 function renderSupplyStats(){var supplies=DB.supplies||[],totalRevenue=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRevenue>0?(totalProfit/totalRevenue*100):0,todayStr=ttToday(),todayProfit=supplies.filter(function(e){return e.date===todayStr;}).reduce(function(s,e){return s+e.profit;},0);var grid=document.getElementById('supplyStatGrid');if(!grid)return;grid.innerHTML='<div class="tt-stat-card gold"><div class="tt-stat-label">Total Supplied</div><div class="tt-stat-val gold">₦'+ttFmt(totalRevenue)+'</div><div class="tt-stat-sub">'+supplies.length+' entries</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Cost</div><div class="tt-stat-val red">₦'+ttFmt(totalCost)+'</div><div class="tt-stat-sub">Incl. transport &amp; other costs</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Supply Profit</div><div class="tt-stat-val green">₦'+ttFmt(totalProfit)+'</div><div class="tt-stat-sub">Net after all costs</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">Profit Margin</div><div class="tt-stat-val blue">'+margin.toFixed(1)+'%</div><div class="tt-stat-sub">Today: ₦'+ttFmt(todayProfit)+'</div></div>';}
 function renderSupplyBreakdown(){var supplies=DB.supplies||[],bdEl=document.getElementById('supplyBreakdownBody'),tcEl=document.getElementById('supplyTopCustomers');if(!bdEl)return;if(!supplies.length){bdEl.innerHTML='<div class="tt-empty"><div class="tt-empty-icon">📦</div>No supply entries yet.</div>';tcEl.innerHTML='<div class="tt-empty" style="padding:10px 0;">No data yet.</div>';return;}var totalRev=supplies.reduce(function(s,e){return s+e.revenue;},0),totalCost=supplies.reduce(function(s,e){return s+e.cost;},0),totalAddl=supplies.reduce(function(s,e){return s+(e.additionalTotal||0);},0),totalProfit=supplies.reduce(function(s,e){return s+e.profit;},0),margin=totalRev>0?(totalProfit/totalRev*100):0,profClass=totalProfit>=0?'green':'red';bdEl.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:12px;"><div style="background:var(--tt-surface2);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Revenue</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-gold);">₦'+ttFmt(totalRev)+'</div></div><div style="background:var(--tt-red-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Total Cost (incl. addl.)</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-red);">₦'+ttFmt(totalCost)+'</div><div style="font-size:10px;color:var(--tt-ink3);margin-top:3px;">Additional: ₦'+ttFmt(totalAddl)+'</div></div><div style="background:var(--tt-green-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Net Profit</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-'+profClass+');">'+(totalProfit<0?'−':'')+'₦'+ttFmt(Math.abs(totalProfit))+'</div></div><div style="background:var(--tt-blue-bg);border:1px solid var(--tt-border);border-radius:7px;padding:11px;"><div class="tt-stat-label">Avg Margin</div><div style="font-family:\'DM Mono\',monospace;font-size:14px;color:var(--tt-blue);">'+margin.toFixed(1)+'%</div></div></div>';var custMap={};supplies.forEach(function(e){if(!custMap[e.customer])custMap[e.customer]={revenue:0,profit:0,entries:0};custMap[e.customer].revenue+=e.revenue;custMap[e.customer].profit+=e.profit;custMap[e.customer].entries++;});var custArr=Object.keys(custMap).map(function(k){return{name:k,revenue:custMap[k].revenue,profit:custMap[k].profit,entries:custMap[k].entries};});custArr.sort(function(a,b){return b.profit-a.profit;});tcEl.innerHTML=custArr.slice(0,5).map(function(c,i){var pc=c.revenue>0?(c.profit/c.revenue*100).toFixed(1):'0.0';return'<div class="tt-entity-row" style="margin-bottom:5px;"><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--tt-ink3);min-width:18px;">#'+(i+1)+'</div><div class="tt-entity-body"><div class="tt-entity-name">'+c.name+'</div><div class="tt-entity-phone">'+c.entries+' entr'+(c.entries===1?'y':'ies')+' · margin '+pc+'%</div></div><div style="text-align:right;"><div style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--tt-gold);">₦'+ttFmt(c.revenue)+'</div><div style="font-family:\'DM Mono\',monospace;font-size:11px;color:'+(c.profit>=0?'var(--tt-green)':'var(--tt-red)')+';">'+(c.profit<0?'−':'')+'₦'+ttFmt(Math.abs(c.profit))+'</div></div></div>';}).join('');}
-function renderSupplyLedger(){var supplies=DB.supplies||[],custQ=(document.getElementById('sfCustomer')||{value:''}).value.toLowerCase(),fFrom=(document.getElementById('sfFrom')||{value:''}).value,fTo=(document.getElementById('sfTo')||{value:''}).value,rows=supplies.filter(function(e){if(custQ&&e.customer.toLowerCase().indexOf(custQ)<0)return false;if(fFrom&&e.date<fFrom)return false;if(fTo&&e.date>fTo)return false;return true;});var tbody=document.getElementById('supplyLedgerBody'),empty=document.getElementById('supplyLedgerEmpty');if(!tbody)return;if(!rows.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}if(empty)empty.style.display='none';tbody.innerHTML=rows.map(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0',profColor=e.profit>=0?'var(--tt-green)':'var(--tt-red)';var addlNote=(e.additionalTotal&&e.additionalTotal>0)?'<br><span style="font-size:10px;color:var(--tt-red);">+₦'+ttFmt(e.additionalTotal)+' addl. costs</span>':'';return'<tr><td class="tt-mono">'+e.date+'</td><td class="tt-mono" style="color:var(--tt-ink3);">'+e.ref+'</td><td style="font-weight:600;color:var(--tt-ink)">'+e.customer+'</td><td style="color:var(--tt-ink2);">'+e.product+(e.narr?'<br><span style="font-size:10px;color:var(--tt-ink3);">'+e.narr+'</span>':'')+addlNote+'</td><td class="tt-mono" style="color:var(--tt-gold);">₦'+ttFmt(e.revenue)+'</td><td class="tt-mono" style="color:var(--tt-red);">₦'+ttFmt(e.cost)+'</td><td class="tt-mono" style="color:'+profColor+';">'+(e.profit<0?'−':'')+'₦'+ttFmt(Math.abs(e.profit))+'</td><td class="tt-mono" style="color:'+profColor+';">'+margin+'%</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteSupply(\''+e.id+'\')">✕</button></td></tr>';}).join('');}
+function renderSupplyLedger(){var supplies=DB.supplies||[],custQ=(document.getElementById('sfCustomer')||{value:''}).value.toLowerCase(),fFrom=(document.getElementById('sfFrom')||{value:''}).value,fTo=(document.getElementById('sfTo')||{value:''}).value,rows=supplies.filter(function(e){if(custQ&&e.customer.toLowerCase().indexOf(custQ)<0)return false;if(fFrom&&e.date<fFrom)return false;if(fTo&&e.date>fTo)return false;return true;});var tbody=document.getElementById('supplyLedgerBody'),empty=document.getElementById('supplyLedgerEmpty');if(!tbody)return;if(!rows.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}if(empty)empty.style.display='none';tbody.innerHTML=rows.map(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0',profColor=e.profit>=0?'var(--tt-green)':'var(--tt-red)';var addlNote=(e.additionalTotal&&e.additionalTotal>0)?'<br><span style="font-size:10px;color:var(--tt-red);">+₦'+ttFmt(e.additionalTotal)+' addl. costs</span>':'';var transNote=(e.transportCost&&e.transportCost>0)?'<br><span style="font-size:10px;color:var(--tt-red);">🚛 Transport: ₦'+ttFmt(e.transportCost)+'</span>':'';var otherNote=(e.otherExpenses&&e.otherExpenses>0)?'<br><span style="font-size:10px;color:var(--tt-red);">📋 Other Exp: ₦'+ttFmt(e.otherExpenses)+'</span>':'';return'<tr><td class="tt-mono">'+e.date+'</td><td class="tt-mono" style="color:var(--tt-ink3);">'+e.ref+'</td><td style="font-weight:600;color:var(--tt-ink)">'+e.customer+'</td><td style="color:var(--tt-ink2);">'+e.product+(e.narr?'<br><span style="font-size:10px;color:var(--tt-ink3);">'+e.narr+'</span>':'')+addlNote+transNote+otherNote+'</td><td class="tt-mono" style="color:var(--tt-gold);">₦'+ttFmt(e.revenue)+'</td><td class="tt-mono" style="color:var(--tt-red);">₦'+ttFmt(e.cost)+'</td><td class="tt-mono" style="color:'+profColor+';">'+(e.profit<0?'−':'')+'₦'+ttFmt(Math.abs(e.profit))+'</td><td class="tt-mono" style="color:'+profColor+';">'+margin+'%</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteSupply(\''+e.id+'\')">✕</button></td></tr>';}).join('');}
 function deleteSupply(id){if(!confirm('Delete this supply entry?'))return;DB.supplies=(DB.supplies||[]).filter(function(e){return e.id!==id;});saveDB();renderSupplyStats();renderSupplyLedger();renderSupplyBreakdown();renderDashboard();ttToast('Supply entry deleted.');}
 function clearSupplyFilters(){['sfCustomer','sfFrom','sfTo'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});renderSupplyLedger();}
-function exportSupplyCSV(){var supplies=DB.supplies||[];if(!supplies.length){ttToast('No supply entries to export.');return;}var rows=[['Date','Ref','Customer','Products','Revenue','Base Cost','Additional Costs','Additional Cost Detail','Total Cost','Profit','Margin%','Notes']];supplies.forEach(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0';var addlDetail=(e.additionalCosts||[]).map(function(c){return c.costType+(c.desc?'('+c.desc+')':'')+': ₦'+ttFmt(c.amount);}).join(' | ');rows.push([e.date,e.ref,e.customer,e.product,e.revenue,(e.cost-(e.additionalTotal||0)),e.additionalTotal||0,addlDetail,e.cost,e.profit,margin,e.narr||'']);});var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='firsttoph_supply_'+ttToday()+'.csv';a.click();}
+function exportSupplyCSV(){var supplies=DB.supplies||[];if(!supplies.length){ttToast('No supply entries to export.');return;}var rows=[['Date','Ref','Customer','Products','Revenue','Base Cost','Transport Cost','Other Expenses','Additional Costs','Additional Cost Detail','Total Cost','Profit','Margin%','Notes']];supplies.forEach(function(e){var margin=e.revenue>0?(e.profit/e.revenue*100).toFixed(1):'0.0';var addlDetail=(e.additionalCosts||[]).map(function(c){return c.costType+(c.desc?'('+c.desc+')':'')+': ₦'+ttFmt(c.amount);}).join(' | ');rows.push([e.date,e.ref,e.customer,e.product,e.revenue,(e.cost-(e.additionalTotal||0)-(e.transportCost||0)-(e.otherExpenses||0)),e.transportCost||0,e.otherExpenses||0,e.additionalTotal||0,addlDetail,e.cost,e.profit,margin,e.narr||'']);});var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='firsttoph_supply_'+ttToday()+'.csv';a.click();}
 
 function ttFmt(n){return Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+
+/* ════════════════════════════════════════
+   FGV BANK ACCOUNT
+════════════════════════════════════════ */
+function initBankDates(){
+  var today=ttToday();
+  var crDate=document.getElementById('bankCrDate');var drDate=document.getElementById('bankDrDate');
+  if(crDate&&!crDate.value)crDate.value=today;
+  if(drDate&&!drDate.value)drDate.value=today;
+  updateBankRefPreviews();
+}
+function updateBankRefPreviews(){
+  var next='BNK-'+String((DB.bankCounter||0)+1).padStart(4,'0');
+  var crEl=document.getElementById('bankCrRefPreview');var drEl=document.getElementById('bankDrRefPreview');
+  if(crEl)crEl.textContent='Next Ref: '+next;
+  if(drEl)drEl.textContent='Next Ref: '+next;
+}
+function updateBankPreview(){}
+
+function getBankBalance(){
+  return (DB.fgvBank||[]).reduce(function(s,e){return s+(e.side==='credit'?e.amount:-e.amount);},0);
+}
+function getTotalBankCredits(){return (DB.fgvBank||[]).filter(function(e){return e.side==='credit';}).reduce(function(s,e){return s+e.amount;},0);}
+function getTotalBankDebits(){return (DB.fgvBank||[]).filter(function(e){return e.side==='debit';}).reduce(function(s,e){return s+e.amount;},0);}
+
+function submitBankCredit(){
+  var date=document.getElementById('bankCrDate').value,incType=document.getElementById('bankCrType').value,amt=parseFloat(document.getElementById('bankCrAmt').value)||0,source=document.getElementById('bankCrSource').value.trim(),narr=document.getElementById('bankCrNarr').value.trim();
+  if(!date){ttToast('⚠ Select a date.');return;}if(amt<=0){ttToast('⚠ Enter a valid amount.');return;}if(!source){ttToast('⚠ Enter source / entity name.');return;}
+  DB.bankCounter=(DB.bankCounter||0)+1;var ref='BNK-'+String(DB.bankCounter).padStart(4,'0');
+  var incTypeLabel={vendor_refund:'Vendor Refund',company_payment:'Company Payment',other_income:'Other Income'}[incType]||incType;
+  var entry={id:'bnk'+Date.now(),ref:ref,date:date,side:'credit',incType:incType,incTypeLabel:incTypeLabel,source:source,narration:narr||(incTypeLabel+' — '+source),amount:amt};
+  if(!DB.fgvBank)DB.fgvBank=[];
+  DB.fgvBank.unshift(entry);saveDB();renderBankTab();updateBankRefPreviews();
+  /* clear */
+  document.getElementById('bankCrAmt').value='';document.getElementById('bankCrSource').value='';document.getElementById('bankCrNarr').value='';
+  ttToast('✓ '+ref+' posted — Credit ₦'+ttFmt(amt)+' to FGV Bank');
+}
+
+function submitBankDebit(){
+  var date=document.getElementById('bankDrDate').value,expType=document.getElementById('bankDrType').value,amt=parseFloat(document.getElementById('bankDrAmt').value)||0,payee=document.getElementById('bankDrPayee').value.trim(),narr=document.getElementById('bankDrNarr').value.trim();
+  if(!date){ttToast('⚠ Select a date.');return;}if(amt<=0){ttToast('⚠ Enter a valid amount.');return;}if(!payee){ttToast('⚠ Enter payee / recipient.');return;}
+  var bal=getBankBalance();
+  if(bal<amt){if(!confirm('FGV Bank balance (₦'+ttFmt(bal)+') is less than the debit amount (₦'+ttFmt(amt)+'). This will create an overdraft. Proceed?'))return;}
+  DB.bankCounter=(DB.bankCounter||0)+1;var ref='BNK-'+String(DB.bankCounter).padStart(4,'0');
+  var expTypeLabel={advance_payment:'Advance to Vendor',daily_expense:'Daily Expense',salary:'Salary/Remuneration',transport:'Transport',utility:'Utility/Overhead',other_expense:'Other Expenditure'}[expType]||expType;
+  var entry={id:'bnk'+Date.now(),ref:ref,date:date,side:'debit',expType:expType,expTypeLabel:expTypeLabel,payee:payee,narration:narr||(expTypeLabel+' — '+payee),amount:amt};
+  if(!DB.fgvBank)DB.fgvBank=[];
+  DB.fgvBank.unshift(entry);saveDB();renderBankTab();renderIncExpTab();updateBankRefPreviews();
+  /* clear */
+  document.getElementById('bankDrAmt').value='';document.getElementById('bankDrPayee').value='';document.getElementById('bankDrNarr').value='';
+  ttToast('✓ '+ref+' posted — Debit ₦'+ttFmt(amt)+' from FGV Bank');
+}
+
+function renderBankTab(){
+  var bank=DB.fgvBank||[];
+  var totalCr=getTotalBankCredits(),totalDr=getTotalBankDebits(),bal=getBankBalance();
+  /* stats */
+  var statGrid=document.getElementById('bankStatGrid');
+  if(statGrid)statGrid.innerHTML='<div class="tt-stat-card green"><div class="tt-stat-label">FGV Bank Balance</div><div class="tt-stat-val '+(bal<0?'neg':'green')+'">'+( bal<0?'−':'')+'₦'+ttFmt(Math.abs(bal))+'</div><div class="tt-stat-sub">Current account position</div></div><div class="tt-stat-card green"><div class="tt-stat-label">Total Credits (Income)</div><div class="tt-stat-val green">₦'+ttFmt(totalCr)+'</div><div class="tt-stat-sub">'+bank.filter(function(e){return e.side==='credit';}).length+' credit entries</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Debits (Expenditure)</div><div class="tt-stat-val red">₦'+ttFmt(totalDr)+'</div><div class="tt-stat-sub">'+bank.filter(function(e){return e.side==='debit';}).length+' debit entries</div></div>';
+  /* summary card */
+  var balEl=document.getElementById('fgvBankBal');if(balEl){balEl.textContent=(bal<0?'−':'')+'₦'+ttFmt(Math.abs(bal));balEl.style.color=bal<0?'var(--tt-red)':'var(--tt-green)';}
+  var crEl=document.getElementById('fgvBankTotalCr');if(crEl)crEl.textContent='₦'+ttFmt(totalCr);
+  var drEl=document.getElementById('fgvBankTotalDr');if(drEl)drEl.textContent='₦'+ttFmt(totalDr);
+  /* recent list */
+  var recentEl=document.getElementById('bankRecentList');
+  if(recentEl){
+    if(!bank.length){recentEl.innerHTML='<div class="tt-empty"><div class="tt-empty-icon">🏦</div>No transactions yet.</div>';}
+    else{var html='';bank.slice(0,8).forEach(function(e){html+='<div class="tt-ledger-mini-row" style="grid-template-columns:70px 1fr 85px 85px;"><div class="tt-lm-date">'+e.date+'</div><div class="tt-lm-desc" style="font-size:11px;">'+(e.side==='credit'?e.source:e.payee)+' <span style="font-size:9px;color:var(--tt-ink3);">— '+(e.side==='credit'?e.incTypeLabel:e.expTypeLabel)+'</span></div><div class="tt-lm-amt" style="color:'+(e.side==='credit'?'var(--tt-green)':'var(--tt-red)')+';">'+(e.side==='credit'?'+':'−')+'₦'+ttFmt(e.amount)+'</div><div class="tt-lm-bal" style="color:var(--tt-ink2);font-size:10px;">'+e.ref+'</div></div>';});recentEl.innerHTML=html;}
+  }
+  renderBankLedger();
+  renderIncExpTab();
+}
+
+function renderBankLedger(){
+  var bank=DB.fgvBank||[],fType=(document.getElementById('bankFType')||{value:''}).value,fFrom=(document.getElementById('bankFFrom')||{value:''}).value,fTo=(document.getElementById('bankFTo')||{value:''}).value;
+  var rows=[...bank];
+  if(fType==='credit')rows=rows.filter(function(e){return e.side==='credit';});
+  else if(fType==='debit')rows=rows.filter(function(e){return e.side==='debit';});
+  if(fFrom)rows=rows.filter(function(e){return e.date>=fFrom;});
+  if(fTo)rows=rows.filter(function(e){return e.date<=fTo;});
+  var tbody=document.getElementById('bankLedgerBody'),empty=document.getElementById('bankLedgerEmpty');
+  if(!tbody)return;
+  if(!rows.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  /* Calculate running balance in chronological order */
+  var sorted=[...bank].reverse();var runBal=0;var runMap={};
+  sorted.forEach(function(e){runBal+=(e.side==='credit'?e.amount:-e.amount);runMap[e.id]=runBal;});
+  tbody.innerHTML=rows.map(function(e){
+    var rb=runMap[e.id]||0,dr=e.side==='debit'?'₦'+ttFmt(e.amount):'—',cr=e.side==='credit'?'₦'+ttFmt(e.amount):'—';
+    return'<tr><td class="tt-mono" style="font-size:11px;white-space:nowrap;">'+e.date+'</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">'+e.ref+'</td><td><span class="tt-badge '+(e.side==='credit'?'tt-badge-company':'tt-badge-vendor')+'">'+(e.side==='credit'?e.incTypeLabel:e.expTypeLabel)+'</span></td><td style="font-size:12px;color:var(--tt-ink2);">'+e.narration+'</td><td style="font-size:12px;color:var(--tt-ink2);">'+(e.side==='credit'?e.source:e.payee)+'</td><td class="tt-mono" style="color:var(--tt-red);">'+dr+'</td><td class="tt-mono" style="color:var(--tt-green);">'+cr+'</td><td class="tt-mono" style="color:'+(rb<0?'var(--tt-red)':'var(--tt-green)')+';">'+(rb<0?'−':'')+'₦'+ttFmt(Math.abs(rb))+'</td><td><button class="tt-btn tt-btn-sm tt-btn-danger" onclick="deleteBankEntry(\''+e.id+'\')">✕</button></td></tr>';
+  }).join('');
+}
+
+function deleteBankEntry(id){
+  if(!confirm('Delete this bank entry? The balance will be reversed.'))return;
+  DB.fgvBank=(DB.fgvBank||[]).filter(function(e){return e.id!==id;});
+  saveDB();renderBankTab();ttToast('Bank entry deleted.');
+}
+
+function clearBankFilters(){['bankFType','bankFFrom','bankFTo'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});renderBankLedger();}
+
+function exportBankCSV(){
+  var bank=DB.fgvBank||[];if(!bank.length){ttToast('No bank entries to export.');return;}
+  var rows=[['Date','Ref','Side','Type','Source/Payee','Narration','Debit (₦)','Credit (₦)']];
+  bank.forEach(function(e){rows.push([e.date,e.ref,e.side,(e.side==='credit'?e.incTypeLabel:e.expTypeLabel),(e.side==='credit'?e.source:e.payee),e.narration,e.side==='debit'?e.amount:'',e.side==='credit'?e.amount:'']);});
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fgv_bank_'+ttToday()+'.csv';a.click();
+}
+
+/* ════════════════════════════════════════
+   INCOME & EXPENDITURE ACCOUNT
+════════════════════════════════════════ */
+function renderIncExpTab(){
+  /* ── Income: from Supply Account (profit only) ── */
+  var supplies=DB.supplies||[];
+  var totalInc=supplies.reduce(function(s,e){return s+e.profit;},0);
+
+  /* ── Expenditure: from Daily Expenses only ── */
+  var expenses=DB.expenses||[];
+  var totalExp=expenses.reduce(function(s,e){return s+e.amount;},0);
+
+  var surplus=totalInc-totalExp;
+
+  /* stat grid */
+  var sg=document.getElementById('incExpStatGrid');
+  if(sg)sg.innerHTML='<div class="tt-stat-card green"><div class="tt-stat-label">Total Income</div><div class="tt-stat-val green">₦'+ttFmt(totalInc)+'</div><div class="tt-stat-sub">'+supplies.length+' supply entries</div></div><div class="tt-stat-card red"><div class="tt-stat-label">Total Expenditure</div><div class="tt-stat-val red">₦'+ttFmt(totalExp)+'</div><div class="tt-stat-sub">'+expenses.length+' daily expense entries</div></div><div class="tt-stat-card '+(surplus>=0?'green':'red')+'"><div class="tt-stat-label">Surplus / (Deficit)</div><div class="tt-stat-val '+(surplus>=0?'green':'neg')+'">'+(surplus<0?'−':'')+'₦'+ttFmt(Math.abs(surplus))+'</div><div class="tt-stat-sub">'+(surplus>=0?'Surplus for the period':'Deficit for the period')+'</div></div><div class="tt-stat-card blue"><div class="tt-stat-label">FGV Bank Balance</div><div class="tt-stat-val blue">₦'+ttFmt(getBankBalance())+'</div><div class="tt-stat-sub">As at today</div></div>';
+
+  /* Income account table — supply profit entries */
+  var totalIncDisplay=totalInc<0?'('+ttFmt(Math.abs(totalInc))+')':'₦'+ttFmt(totalInc);
+  var incEl=document.getElementById('incAcctBal');if(incEl)incEl.textContent=totalIncDisplay;
+  var incBody=document.getElementById('incAcctBody'),incEmpty=document.getElementById('incAcctEmpty');
+  if(incBody){
+    if(!supplies.length){incBody.innerHTML='';if(incEmpty)incEmpty.style.display='block';}
+    else{if(incEmpty)incEmpty.style.display='none';var runInc=0;incBody.innerHTML=supplies.map(function(e){runInc+=e.profit;var profColor=e.profit<0?'var(--tt-red)':'var(--tt-green)';return'<tr><td class="tt-mono" style="font-size:11px;">'+e.date+'</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">'+e.ref+'</td><td style="font-size:11px;color:var(--tt-ink2);">Supply to '+e.customer+' <span style="color:var(--tt-ink3);">('+e.product+')</span></td><td class="tt-mono" style="color:'+profColor+';font-weight:600;">'+(e.profit<0?'−':'')+'₦'+ttFmt(Math.abs(e.profit))+'</td><td class="tt-mono" style="color:'+(runInc<0?'var(--tt-red)':'var(--tt-green)')+';">'+(runInc<0?'−':'')+'₦'+ttFmt(Math.abs(runInc))+'</td></tr>';}).join('');}
+  }
+  /* Income footer stats */
+  var iEc=document.getElementById('incEntryCount');if(iEc)iEc.textContent=supplies.length;
+  var iVr=document.getElementById('incVendorRefunds');if(iVr){
+    var totalRev=supplies.reduce(function(s,e){return s+e.revenue;},0);
+    iVr.textContent='₦'+ttFmt(totalRev);
+  }
+  var iCp=document.getElementById('incCompanyPmts');if(iCp){
+    var totalCostSup=supplies.reduce(function(s,e){return s+e.cost;},0);
+    iCp.textContent='₦'+ttFmt(totalCostSup);
+  }
+
+  /* Expenditure account table — daily expenses entries */
+  var expEl=document.getElementById('expAcctBal');if(expEl)expEl.textContent='₦'+ttFmt(totalExp);
+  var expBody=document.getElementById('expAcctBody'),expEmpty=document.getElementById('expAcctEmpty');
+  if(expBody){
+    if(!expenses.length){expBody.innerHTML='';if(expEmpty)expEmpty.style.display='block';}
+    else{if(expEmpty)expEmpty.style.display='none';var runExp=0;expBody.innerHTML=expenses.map(function(e){runExp+=e.amount;return'<tr><td class="tt-mono" style="font-size:11px;">'+e.date+'</td><td class="tt-mono" style="font-size:11px;color:var(--tt-ink3);">'+e.ref+'</td><td style="font-size:11px;color:var(--tt-ink2);">'+e.desc+' <span style="color:var(--tt-ink3);">('+e.category+')</span></td><td class="tt-mono" style="color:var(--tt-red);font-weight:600;">₦'+ttFmt(e.amount)+'</td><td class="tt-mono" style="color:var(--tt-red);">₦'+ttFmt(runExp)+'</td></tr>';}).join('');}
+  }
+  var eEc=document.getElementById('expEntryCount');if(eEc)eEc.textContent=expenses.length;
+  var eAd=document.getElementById('expAdvances');if(eAd){
+    /* Re-purpose: show today's expenses */
+    var todayExp=expenses.filter(function(e){return e.date===ttToday();}).reduce(function(s,e){return s+e.amount;},0);
+    eAd.textContent='₦'+ttFmt(todayExp);
+  }
+  var eDt=document.getElementById('expDailyTotal');if(eDt)eDt.textContent='₦'+ttFmt(totalExp);
+
+  /* IAS Statement */
+  function setIAS(id,val){var el=document.getElementById(id);if(el)el.textContent=val>0?'₦'+ttFmt(val):(val<0?'(₦'+ttFmt(Math.abs(val))+')':'—');}
+  /* Income = supply profit only */
+  var supplyProfit=supplies.reduce(function(s,e){return s+e.profit;},0);
+  setIAS('ias_vRefunds',supplyProfit);
+  /* Hide the other income rows in IAS */
+  var cPayRow=document.getElementById('ias_cPay');if(cPayRow){cPayRow.textContent='—';var cPayTr=cPayRow.closest('tr');if(cPayTr)cPayTr.style.display='none';}
+  var otherIncRow=document.getElementById('ias_otherInc');if(otherIncRow){otherIncRow.textContent='—';var otherIncTr=otherIncRow.closest('tr');if(otherIncTr)otherIncTr.style.display='none';}
+  var tiEl=document.getElementById('ias_totalInc');if(tiEl){tiEl.textContent=totalInc!==0?'₦'+ttFmt(totalInc):'—';tiEl.style.color='var(--tt-green)';}
+  /* Expenditure = daily expenses total only */
+  setIAS('ias_daily',totalExp);
+  /* Hide other expenditure rows */
+  ['ias_advance','ias_salary','ias_transport','ias_utility','ias_otherExp'].forEach(function(rid){
+    var el=document.getElementById(rid);if(!el)return;el.textContent='—';var tr=el.closest('tr');if(tr)tr.style.display='none';
+  });
+  var teEl=document.getElementById('ias_totalExp');if(teEl){teEl.textContent=totalExp>0?'₦'+ttFmt(totalExp):'—';teEl.style.color='var(--tt-red)';}
+  var sEl=document.getElementById('ias_surplus');if(sEl){sEl.textContent=(surplus<0?'−':'')+'₦'+ttFmt(Math.abs(surplus));sEl.style.color=surplus>=0?'var(--tt-green)':'var(--tt-red)';}
+}
 
 /* ════════════════════════════════════════
    INIT
